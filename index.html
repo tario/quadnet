@@ -62,59 +62,63 @@ function() {
 
   $container.append(renderer.domElement);
 
-  var mouseDown = false;
-  $(document).mousedown(function(event) {
-    mouseDown = true;
-  });
-  $(document).mouseup(function(event) {
-    mouseDown = false;
-  });
+  var implementCameraControls = function(document) {
 
-  var anglex = 0;
-  var angley = 0;
+    var mouseDown = false;
+    $(document).mousedown(function(event) {
+      mouseDown = true;
+    });
+    $(document).mouseup(function(event) {
+      mouseDown = false;
+    });
 
-  var last_pagex;
-  var last_pagey;
-  var last_delta = false;
+    var anglex = 0;
+    var angley = 0;
 
-  $(document).mousemove(function(event) {
-    var deltax = event.pageX - last_pagex;
-    var deltay = event.pageY - last_pagey;
+    var last_pagex;
+    var last_pagey;
+    var last_delta = false;
 
-    if (last_delta && mouseDown) {
-      var rotationMatrix = new THREE.Matrix4();
-      var aux = new THREE.Matrix4();
+    $(document).mousemove(function(event) {
+      var deltax = event.pageX - last_pagex;
+      var deltay = event.pageY - last_pagey;
 
-      anglex = anglex - deltax * 0.01;
-      angley = angley - deltay * 0.01;
+      if (last_delta && mouseDown) {
+        var rotationMatrix = new THREE.Matrix4();
+        var aux = new THREE.Matrix4();
 
-      if (anglex > Math.PI) anglex = anglex - Math.PI*2; 
-      if (anglex < -Math.PI) anglex = anglex + Math.PI*2; 
-      if (angley > Math.PI/2) angley = Math.PI/2;
-      if (angley < -Math.PI/2) angley = -Math.PI/2;
+        anglex = anglex - deltax * 0.01;
+        angley = angley - deltay * 0.01;
 
-      aux.makeRotationX(angley);
-      rotationMatrix = aux.multiply(rotationMatrix);
+        if (anglex > Math.PI) anglex = anglex - Math.PI*2; 
+        if (anglex < -Math.PI) anglex = anglex + Math.PI*2; 
+        if (angley > Math.PI/2) angley = Math.PI/2;
+        if (angley < -Math.PI/2) angley = -Math.PI/2;
 
-      aux = new THREE.Matrix4();
-      aux.makeRotationY(anglex);
-      rotationMatrix = aux.multiply(rotationMatrix);
+        aux.makeRotationX(angley);
+        rotationMatrix = aux.multiply(rotationMatrix);
 
-      camera.position.set(0,0,500);
-      camera.position.applyMatrix4(rotationMatrix);
-      camera.lookAt(origin);
-    }
+        aux = new THREE.Matrix4();
+        aux.makeRotationY(anglex);
+        rotationMatrix = aux.multiply(rotationMatrix);
 
-    last_pagex = event.pageX;
-    last_pagey = event.pageY;
-    last_delta = true;
-  });
+        camera.position.set(0,0,500);
+        camera.position.applyMatrix4(rotationMatrix);
+        camera.lookAt(origin);
+      }
+
+      last_pagex = event.pageX;
+      last_pagey = event.pageY;
+      last_delta = true;
+    });
+  };
 
   var anim = function() { 
     renderer.render(scene,camera);
     requestAnimationFrame(anim);
   };
 
+  implementCameraControls(document);
   requestAnimationFrame(anim);
 });
 
