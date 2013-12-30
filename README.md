@@ -13,12 +13,12 @@ These are the possible dependencies, as well as the project grows maybe other de
 
 * A test cube in the middle of anything
 * Camera controls using the mouse
-* Rudimentary versions of four main game meshes, no ligthing
+* Rudimentary versions of four main game meshes, phong materials
   - Ship (a triangle)
   - Asteroids (grey spheres)
   - Grid (a square)
   - Bullets (white spheres)
-* Build scene, at first will be the grid seen from above and black background, no lighting
+* Build scene, at first will be the grid seen from above and black background, directional lighting
 * Game logic, includes "physics" and ship control/shooting
 * Camera movements, including lurch and following the ship in angle
 * Rudimentary menu, allowing to start the game and showing credits
