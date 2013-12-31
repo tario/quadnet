@@ -79,7 +79,7 @@ var quadnet = function(document, canvas_container, width, height) {
 
   scene.add(light);
 
-  camera.position.z = 500;
+  camera.position.z = 370;
 
   var origin = new THREE.Vector3(0,0,0);
   camera.lookAt(origin);
@@ -144,7 +144,7 @@ var quadnet = function(document, canvas_container, width, height) {
         aux.makeRotationY(anglex);
         rotationMatrix = aux.multiply(rotationMatrix);
 
-        camera.position.set(0,0,500);
+        camera.position.set(0,0,370);
         camera.position.applyMatrix4(rotationMatrix);
         camera.lookAt(origin);
       }
