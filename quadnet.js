@@ -137,6 +137,26 @@ var quadnet = function(document, canvas_container, width, height) {
     });
   }
 
+
+  var anglex = 0;
+  var angley = 0;
+
+  var updateCameraAngle = function() {
+    var rotationMatrix = new THREE.Matrix4();
+    var aux = new THREE.Matrix4();
+
+    aux.makeRotationX(angley);
+    rotationMatrix = aux.multiply(rotationMatrix);
+
+    aux = new THREE.Matrix4();
+    aux.makeRotationY(anglex);
+    rotationMatrix = aux.multiply(rotationMatrix);
+
+    camera.position.set(0,0,370);
+    camera.position.applyMatrix4(rotationMatrix);
+    camera.lookAt(origin);    
+  };
+
   var implementCameraControls = function(document) {
 
     var mouseDown = false;
@@ -147,9 +167,6 @@ var quadnet = function(document, canvas_container, width, height) {
       mouseDown = false;
     });
 
-    var anglex = 0;
-    var angley = 0;
-
     var last_pagex;
     var last_pagey;
     var last_delta = false;
@@ -159,9 +176,6 @@ var quadnet = function(document, canvas_container, width, height) {
       var deltay = event.pageY - last_pagey;
 
       if (last_delta && mouseDown) {
-        var rotationMatrix = new THREE.Matrix4();
-        var aux = new THREE.Matrix4();
-
         anglex = anglex - deltax * 0.01;
         angley = angley - deltay * 0.01;
 
@@ -170,16 +184,7 @@ var quadnet = function(document, canvas_container, width, height) {
         if (angley > Math.PI/2) angley = Math.PI/2;
         if (angley < -Math.PI/2) angley = -Math.PI/2;
 
-        aux.makeRotationX(angley);
-        rotationMatrix = aux.multiply(rotationMatrix);
-
-        aux = new THREE.Matrix4();
-        aux.makeRotationY(anglex);
-        rotationMatrix = aux.multiply(rotationMatrix);
-
-        camera.position.set(0,0,370);
-        camera.position.applyMatrix4(rotationMatrix);
-        camera.lookAt(origin);
+        updateCameraAngle();
       }
 
       last_pagex = event.pageX;
@@ -260,6 +265,11 @@ var quadnet = function(document, canvas_container, width, height) {
     game_state.shoots.forEach(function(obj){
       obj.think(ticks);
     });
+
+    // camera angle
+    anglex = ship.position.x * Math.PI / 330;
+    angley = -ship.position.y * Math.PI / 330;
+    updateCameraAngle();
   };
 
   var last_elapsed = null;
