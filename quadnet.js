@@ -189,27 +189,40 @@ var quadnet = function(document, canvas_container, width, height) {
   };
 
   var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false};
+
+  var ondestroy_callback = function(obj) {
+    var i = game_state.shoots.indexOf(obj);
+    if (i>-1){
+      game_state.shoots.splice(i,1);
+    }
+  };
+
   var game_state = {
     shoots: [],
     spawnShoot: function(dx, dy) {
       var object3d = createBullet();
       object3d.position.set(ship.position.x, ship.position.y, ship.position.z );
       scene.add(object3d);
-      game_state.shoots.push(new Bullet(object3d, dx, dy));
+      var obj = new Bullet(object3d, dx, dy);
+      obj.ondestroy(ondestroy_callback);
+      game_state.shoots.push(obj);
     }
   };
 
   var Bullet = function(object3d, dx, dy) {
+    var ondestroy_callback = function(){};
     this.think = function(ticks) {
       object3d.position.y = object3d.position.y + dy * ticks;
       object3d.position.x = object3d.position.x + dx * ticks;
 
       if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
         scene.remove(object3d);
-        this.dead = true;
+        ondestroy_callback();
       }
     };
-    this.dead = false;
+    this.ondestroy = function(callback) {
+      ondestroy_callback = callback;
+    }
   };
 
   var think = function(ticks) {
@@ -245,13 +258,7 @@ var quadnet = function(document, canvas_container, width, height) {
     else if (ship_state.shoot_left) game_state.spawnShoot(-0.4, 0);
 
     game_state.shoots.forEach(function(obj){
-      obj.think(ticks)
-      if (obj.dead) {
-        var i = game_state.shoots.indexOf(obj);
-        if (i>-1){
-          game_state.shoots.splice(i,1);
-        }
-      }
+      obj.think(ticks);
     });
   };
 
