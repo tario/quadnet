@@ -19,13 +19,34 @@ var quadnet = function(document, canvas_container, width, height) {
 
   var scene = new THREE.Scene();
 
+  var createShip = function() {
+    var geo =  new THREE.Geometry();
+    var material =
+      new THREE.MeshPhongMaterial(
+        {
+          color: 0x00cc00,
+          specular: 0x808080,
+          ambient: 0xffffff,
+          emissive: 0x004000,
+          shininess: 10
+        });
+
+    geo.vertices[0] = new THREE.Vector3(0, 15, 0);
+    geo.vertices[1] = new THREE.Vector3(10,-15, 0); 
+    geo.vertices[2] = new THREE.Vector3(-10, -15, 0);
+
+    geo.faces.push(new THREE.Face3(2, 1, 0));
+    geo.computeFaceNormals();
+
+    return new THREE.Mesh(geo, material);
+  };
 
   var createGrid = function() {
     var geo =  new THREE.Geometry();
     var material =
       new THREE.MeshPhongMaterial(
         {
-          color: 0xCC0000,
+          color: 0xff0000,
           specular: 0x808080,
           ambient: 0xffffff,
           emissive: 0x800000,
@@ -46,7 +67,10 @@ var quadnet = function(document, canvas_container, width, height) {
   }
 
   var grid = createGrid();
+  var ship = createShip();
+  ship.position.set(0,0,1);
   scene.add(grid);
+  scene.add(ship);
   scene.add(camera);
 
   var light =
@@ -64,6 +88,21 @@ var quadnet = function(document, canvas_container, width, height) {
   renderer.setSize(width, height);
   renderer.setClearColor(new THREE.Color(0x000000));
   canvas_container.append(renderer.domElement);
+
+  var implementShipControls = function(document, ship_state) {
+    $("body").keydown(function(e){
+      if (e.keyCode == 38) ship_state.up = true;
+      if (e.keyCode == 39) ship_state.right = true;
+      if (e.keyCode == 37) ship_state.left = true;
+      if (e.keyCode == 40) ship_state.down = true;
+    });
+    $("body").keyup(function(e){
+      if (e.keyCode == 38) ship_state.up = false;
+      if (e.keyCode == 39) ship_state.right = false;
+      if (e.keyCode == 37) ship_state.left = false;
+      if (e.keyCode == 40) ship_state.down = false;
+    });
+  }
 
   var implementCameraControls = function(document) {
 
@@ -116,11 +155,44 @@ var quadnet = function(document, canvas_container, width, height) {
     });
   };
 
-  var anim = function() { 
+  var ship_state = {up: false, down: false, right: false, left: false};
+
+  var think = function(ticks) {
+    var velocity = ticks * 0.35;
+    if (ship_state.up) {
+      ship.rotation.set(0,0,0);
+      ship.position.y += velocity;
+    } else if (ship_state.down) {
+      ship.position.y -= velocity;
+      ship.rotation.set(0,0,0);
+      ship.rotateZ(Math.PI);
+    } else if (ship_state.left) {
+      ship.rotation.set(0,0,0);
+      ship.rotateZ(Math.PI/2);
+      ship.position.x -= velocity;
+    } else if (ship_state.right) {
+      ship.rotation.set(0,0,0);
+      ship.rotateZ(-Math.PI/2);
+      ship.position.x += velocity;
+    }
+
+    if (ship.position.x > 150) ship.position.x = 150;
+    if (ship.position.x < -150) ship.position.x = -150;
+    if (ship.position.y > 150) ship.position.y = 150;
+    if (ship.position.y < -150) ship.position.y = -150;
+  };
+
+  var last_elapsed = null;
+  var anim = function(elapsed) { 
+    if (last_elapsed) {
+      think(elapsed - last_elapsed);
+    }
+    last_elapsed = elapsed;
     renderer.render(scene,camera);
     requestAnimationFrame(anim);
   };
 
   implementCameraControls(document);
+  implementShipControls(document, ship_state);
   requestAnimationFrame(anim);
 };
