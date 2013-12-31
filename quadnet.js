@@ -99,6 +99,9 @@ var quadnet = function(document, canvas_container, width, height) {
       });
     }
 
+    var weapon_heat = 0.0;
+    var weapon_load = 0.0;
+    var weapon_cooldown = false;
     var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false,
       think: function(ticks) {
         var velocity = ticks * 0.35;
@@ -126,11 +129,28 @@ var quadnet = function(document, canvas_container, width, height) {
         if (ship.position.y > 150) ship.position.y = 150;
         if (ship.position.y < -150) ship.position.y = -150;
 
+        weapon_load = weapon_load + ticks;
+        var spawnShoot = function(dx, dy) {
+          game_state.spawnShoot(dx, dy);
+          weapon_heat = weapon_heat + 1.5;
+          weapon_load = 0.0;
+        };
 
-        if (this.shoot_up) game_state.spawnShoot(0, 0.4);
-        else if (this.shoot_down) game_state.spawnShoot(0, -0.4);
-        else if (this.shoot_right) game_state.spawnShoot(0.4, 0);
-        else if (this.shoot_left) game_state.spawnShoot(-0.4, 0);
+        if (weapon_load > 30) {
+          if (weapon_heat < 10 && !weapon_cooldown) {
+              if (this.shoot_up) spawnShoot(0, 0.4);
+              else if (this.shoot_down) spawnShoot(0, -0.4);
+              else if (this.shoot_right) spawnShoot(0.4, 0);
+              else if (this.shoot_left) spawnShoot(-0.4, 0);
+          } else {
+            // cooldown
+            weapon_cooldown = true;
+            if (weapon_heat <= 0.0) {
+              weapon_cooldown = false;
+            }
+          }
+          if (weapon_heat > 0.0) weapon_heat -= 0.5;
+        }
       }
     };
     implementShipControls(document, ship_state);
