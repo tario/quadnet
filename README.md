@@ -2,17 +2,17 @@ GAME UNDER CONSTRUCTION
 
 This project will be a remake of the classical game named "Quadnet" (http://www.martinmagnusson.com/games/quadnet/) using new technologies of web mainly WebGL, if you want to play the original, use DosBOX, it's still a wonderful and addictive game
 
-= Possible Dependencies =
+# Possible Dependencies
 
 These are the possible dependencies, as well as the project grows maybe other dependencies will be added for sound, social networks, etc...
 
 * Three.js (http://threejs.org/) 
 * jQuery (http://jquery.com/)
 
-= Development plan =
+# Development plan
 
-* A test cube in the middle of anything
-* Camera controls using the mouse
+* A test cube in the middle of anything DONE
+* Camera controls using the mouse DONE
 * Rudimentary versions of four main game meshes, phong materials
   - Ship (a triangle)
   - Asteroids (grey spheres)
