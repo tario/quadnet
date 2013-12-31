@@ -95,42 +95,6 @@ var quadnet = function(document, canvas_container, width, height) {
     camera.lookAt(origin);    
   };
 
-  var implementCameraControls = function(document) {
-
-    var mouseDown = false;
-    $(document).mousedown(function(event) {
-      mouseDown = true;
-    });
-    $(document).mouseup(function(event) {
-      mouseDown = false;
-    });
-
-    var last_pagex;
-    var last_pagey;
-    var last_delta = false;
-
-    $(document).mousemove(function(event) {
-      var deltax = event.pageX - last_pagex;
-      var deltay = event.pageY - last_pagey;
-
-      if (last_delta && mouseDown) {
-        camera_state.anglex = camera_state.anglex - deltax * 0.01;
-        camera_state.angley = camera_state.angley - deltay * 0.01;
-
-        if (camera_state.anglex > Math.PI) camera_state.anglex = camera_state.anglex - Math.PI*2; 
-        if (camera_state.anglex < -Math.PI) camera_state.anglex = camera_state.anglex + Math.PI*2; 
-        if (camera_state.angley > Math.PI/2) camera_state.angley = Math.PI/2;
-        if (camera_state.angley < -Math.PI/2) camera_state.angley = -Math.PI/2;
-
-        updateCameraAngle();
-      }
-
-      last_pagex = event.pageX;
-      last_pagey = event.pageY;
-      last_delta = true;
-    });
-  };
-
   var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false,
     think: function(ticks) {
       var velocity = ticks * 0.35;
@@ -216,7 +180,6 @@ var quadnet = function(document, canvas_container, width, height) {
     requestAnimationFrame(anim);
   };
 
-  implementCameraControls(document);
   implementShipControls(document, ship_state);
   requestAnimationFrame(anim);
 };
