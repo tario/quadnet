@@ -1,12 +1,4 @@
 var quadnet = function(document, canvas_container, width, height) {
-  var newRenderer = function() {
-    try {
-      return new THREE.WebGLRenderer();
-    } catch(err) {
-      return new THREE.CanvasRenderer();
-    }
-  }
-
   var origin = new THREE.Vector3(0,0,0);
   var camera = (function() {
     var VIEW_ANGLE = 45,
@@ -44,12 +36,6 @@ var quadnet = function(document, canvas_container, width, height) {
 
     return scene;
   })();
-
-
-  var renderer = newRenderer();
-  renderer.setSize(width, height);
-  renderer.setClearColor(new THREE.Color(0x000000));
-  canvas_container.append(renderer.domElement);
 
   var game_state = (function(){
     var createBullet = Quadnet.objects.createBulletFactory();
@@ -181,6 +167,19 @@ var quadnet = function(document, canvas_container, width, height) {
   })();
 
   (function() {
+    var newRenderer = function() {
+      try {
+        return new THREE.WebGLRenderer();
+      } catch(err) {
+        return new THREE.CanvasRenderer();
+      }
+    }
+
+    var renderer = newRenderer();
+    renderer.setSize(width, height);
+    renderer.setClearColor(new THREE.Color(0x000000));
+    canvas_container.append(renderer.domElement);
+
     var think = function(ticks) {
       game_state.objects.forEach(function(obj){
         obj.think(ticks);
