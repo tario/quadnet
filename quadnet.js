@@ -6,36 +6,46 @@ var quadnet = function(document, canvas_container, width, height) {
       return new THREE.CanvasRenderer();
     }
   }
-  var VIEW_ANGLE = 45,
-    ASPECT = width / height,
-    NEAR = 0.1,
-    FAR = 10000;
-  var camera =
-    new THREE.PerspectiveCamera(
+
+  var origin = new THREE.Vector3(0,0,0);
+  var camera = (function() {
+    var VIEW_ANGLE = 45,
+      ASPECT = width / height,
+      NEAR = 0.1,
+      FAR = 10000;
+
+    var camera = new THREE.PerspectiveCamera(
       VIEW_ANGLE,
       ASPECT,
       NEAR,
       FAR);
 
-  var scene = new THREE.Scene();
+    camera.position.z = 370;
+    camera.lookAt(origin);
+    return camera;
+  })();
+
   var createBullet = Quadnet.objects.createBulletFactory();
-  var grid = Quadnet.objects.createGrid();
   var ship = Quadnet.objects.createShip();
-  ship.position.set(0,0,1);
-  scene.add(grid);
-  scene.add(ship);
-  scene.add(camera);
 
-  var light =
-    new THREE.DirectionalLight(0xFFFFFF, 1.0);
-  light.position.set(2,1,0)
+  var scene = (function() { 
+    var scene = new THREE.Scene();
 
-  scene.add(light);
+    var grid = Quadnet.objects.createGrid();
+    ship.position.set(0,0,1);
+    scene.add(grid);
+    scene.add(ship);
+    scene.add(camera);
 
-  camera.position.z = 370;
+    var light =
+      new THREE.DirectionalLight(0xFFFFFF, 1.0);
+    light.position.set(2,1,0)
 
-  var origin = new THREE.Vector3(0,0,0);
-  camera.lookAt(origin);
+    scene.add(light);
+
+    return scene;
+  })();
+
 
   var renderer = newRenderer();
   renderer.setSize(width, height);
@@ -161,6 +171,8 @@ var quadnet = function(document, canvas_container, width, height) {
         camera.position.applyMatrix4(rotationMatrix);
         camera.lookAt(origin);    
       };
+      updateCameraAngle();
+
     }, anglex: 0, angley: 0};
 
     game_state.objects.push(camera_state);
