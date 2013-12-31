@@ -28,7 +28,7 @@ var quadnet = function(document, canvas_container, width, height) {
           color: 0xCC0000,
           specular: 0x808080,
           ambient: 0xffffff,
-          emissive: 0x400000,
+          emissive: 0x800000,
           shininess: 10
         });
 
@@ -62,6 +62,7 @@ var quadnet = function(document, canvas_container, width, height) {
 
   var renderer = newRenderer();
   renderer.setSize(width, height);
+  renderer.setClearColor(new THREE.Color(0x000000));
   canvas_container.append(renderer.domElement);
 
   var implementCameraControls = function(document) {
