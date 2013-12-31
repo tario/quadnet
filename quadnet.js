@@ -19,6 +19,29 @@ var quadnet = function(document, canvas_container, width, height) {
 
   var scene = new THREE.Scene();
 
+  var createBulletFactory = function() { 
+    var material =
+      new THREE.MeshPhongMaterial(
+        {
+          color: 0xcccccc,
+          specular: 0x808080,
+          ambient: 0xffffff,
+          emissive: 0x404040,
+          shininess: 10
+        });
+    var geometry = 
+      new THREE.SphereGeometry(
+        2,
+        4,
+        4);
+
+    return function() {
+      return new THREE.Mesh(geometry, material);
+    };
+  }
+
+  var createBullet = createBulletFactory();
+
   var createShip = function() {
     var geo =  new THREE.Geometry();
     var material =
@@ -91,12 +114,22 @@ var quadnet = function(document, canvas_container, width, height) {
 
   var implementShipControls = function(document, ship_state) {
     $("body").keydown(function(e){
+      if (e.keyCode == 87) ship_state.shoot_up = true;
+      if (e.keyCode == 83) ship_state.shoot_down = true;
+      if (e.keyCode == 68) ship_state.shoot_right = true;
+      if (e.keyCode == 65) ship_state.shoot_left = true;
+
       if (e.keyCode == 38) ship_state.up = true;
       if (e.keyCode == 39) ship_state.right = true;
       if (e.keyCode == 37) ship_state.left = true;
       if (e.keyCode == 40) ship_state.down = true;
     });
     $("body").keyup(function(e){
+      if (e.keyCode == 87) ship_state.shoot_up = false;
+      if (e.keyCode == 83) ship_state.shoot_down = false;
+      if (e.keyCode == 68) ship_state.shoot_right = false;
+      if (e.keyCode == 65) ship_state.shoot_left = false;
+
       if (e.keyCode == 38) ship_state.up = false;
       if (e.keyCode == 39) ship_state.right = false;
       if (e.keyCode == 37) ship_state.left = false;
@@ -155,7 +188,29 @@ var quadnet = function(document, canvas_container, width, height) {
     });
   };
 
-  var ship_state = {up: false, down: false, right: false, left: false};
+  var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false};
+  var game_state = {
+    shoots: [],
+    spawnShoot: function(dx, dy) {
+      var object3d = createBullet();
+      object3d.position.set(ship.position.x, ship.position.y, ship.position.z );
+      scene.add(object3d);
+      game_state.shoots.push(new Bullet(object3d, dx, dy));
+    }
+  };
+
+  var Bullet = function(object3d, dx, dy) {
+    this.think = function(ticks) {
+      object3d.position.y = object3d.position.y + dy * ticks;
+      object3d.position.x = object3d.position.x + dx * ticks;
+
+      if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
+        scene.remove(object3d);
+        this.dead = true;
+      }
+    };
+    this.dead = false;
+  };
 
   var think = function(ticks) {
     var velocity = ticks * 0.35;
@@ -166,7 +221,9 @@ var quadnet = function(document, canvas_container, width, height) {
       ship.position.y -= velocity;
       ship.rotation.set(0,0,0);
       ship.rotateZ(Math.PI);
-    } else if (ship_state.left) {
+    }
+
+    if (ship_state.left) {
       ship.rotation.set(0,0,0);
       ship.rotateZ(Math.PI/2);
       ship.position.x -= velocity;
@@ -180,6 +237,22 @@ var quadnet = function(document, canvas_container, width, height) {
     if (ship.position.x < -150) ship.position.x = -150;
     if (ship.position.y > 150) ship.position.y = 150;
     if (ship.position.y < -150) ship.position.y = -150;
+
+
+    if (ship_state.shoot_up) game_state.spawnShoot(0, 0.4);
+    else if (ship_state.shoot_down) game_state.spawnShoot(0, -0.4);
+    else if (ship_state.shoot_right) game_state.spawnShoot(0.4, 0);
+    else if (ship_state.shoot_left) game_state.spawnShoot(-0.4, 0);
+
+    game_state.shoots.forEach(function(obj){
+      obj.think(ticks)
+      if (obj.dead) {
+        var i = game_state.shoots.indexOf(obj);
+        if (i>-1){
+          game_state.shoots.splice(i,1);
+        }
+      }
+    });
   };
 
   var last_elapsed = null;
