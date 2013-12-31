@@ -190,8 +190,8 @@ var quadnet = function(document, canvas_container, width, height) {
 
   var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false};
 
-  var ondestroy_callback = function(obj) {
-    var i = game_state.shoots.indexOf(obj);
+  var ondestroy_callback = function() {
+    var i = game_state.shoots.indexOf(this);
     if (i>-1){
       game_state.shoots.splice(i,1);
     }
@@ -217,7 +217,7 @@ var quadnet = function(document, canvas_container, width, height) {
 
       if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
         scene.remove(object3d);
-        ondestroy_callback();
+        ondestroy_callback.call(this);
       }
     };
     this.ondestroy = function(callback) {
