@@ -25,7 +25,6 @@ var quadnet = function(document, canvas_container, width, height) {
     return camera;
   })();
 
-  var createBullet = Quadnet.objects.createBulletFactory();
   var ship = Quadnet.objects.createShip();
 
   var scene = (function() { 
@@ -52,38 +51,41 @@ var quadnet = function(document, canvas_container, width, height) {
   renderer.setClearColor(new THREE.Color(0x000000));
   canvas_container.append(renderer.domElement);
 
-  var game_state = {
-    objects: [],
-    spawnShoot: function(dx, dy) {
-      var Bullet = function(object3d, dx, dy) {
-        var ondestroy_callback = function(){};
-        this.think = function(ticks) {
-          object3d.position.y = object3d.position.y + dy * ticks;
-          object3d.position.x = object3d.position.x + dx * ticks;
+  var game_state = (function(){
+    var createBullet = Quadnet.objects.createBulletFactory();
+    return {
+      objects: [],
+      spawnShoot: function(dx, dy) {
+        var Bullet = function(object3d, dx, dy) {
+          var ondestroy_callback = function(){};
+          this.think = function(ticks) {
+            object3d.position.y = object3d.position.y + dy * ticks;
+            object3d.position.x = object3d.position.x + dx * ticks;
 
-          if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
-            scene.remove(object3d);
-            ondestroy_callback.call(this);
+            if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
+              scene.remove(object3d);
+              ondestroy_callback.call(this);
+            }
+          };
+          this.ondestroy = function(callback) {
+            ondestroy_callback = callback;
           }
         };
-        this.ondestroy = function(callback) {
-          ondestroy_callback = callback;
-        }
-      };
 
-      var object3d = createBullet();
-      object3d.position.set(ship.position.x, ship.position.y, ship.position.z );
-      scene.add(object3d);
-      var obj = new Bullet(object3d, dx, dy);
-      obj.ondestroy(function() {
-        var i = game_state.objects.indexOf(this);
-        if (i>-1){
-          game_state.objects.splice(i,1);
-        }
-      });
-      game_state.objects.push(obj);
-    }
-  };
+        var object3d = createBullet();
+        object3d.position.set(ship.position.x, ship.position.y, ship.position.z );
+        scene.add(object3d);
+        var obj = new Bullet(object3d, dx, dy);
+        obj.ondestroy(function() {
+          var i = game_state.objects.indexOf(this);
+          if (i>-1){
+            game_state.objects.splice(i,1);
+          }
+        });
+        game_state.objects.push(obj);
+      }
+    };
+  })();
 
   (function(){
     var implementShipControls = function(document, ship_state) {
