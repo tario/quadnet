@@ -16,23 +16,37 @@ var quadnet = function(document, canvas_container, width, height) {
       ASPECT,
       NEAR,
       FAR);
+
   var scene = new THREE.Scene();
-  var material =
-    new THREE.MeshPhongMaterial(
-      {
-        color: 0xCC0000,
-        specular: 0x808080,
-        ambient: 0xffffff,
-        emissive: 0x400000,
-        shininess: 10
-      });
 
 
-  var cube = new THREE.Mesh(
-    new THREE.CubeGeometry(100,100,100),
-    material);
+  var createGrid = function() {
+    var geo =  new THREE.Geometry();
+    var material =
+      new THREE.MeshPhongMaterial(
+        {
+          color: 0xCC0000,
+          specular: 0x808080,
+          ambient: 0xffffff,
+          emissive: 0x400000,
+          shininess: 10
+        });
 
-  scene.add(cube);
+    var size = 150;
+    geo.vertices[0] = new THREE.Vector3(size, size, 0);
+    geo.vertices[1] = new THREE.Vector3(size,-size, 0); 
+    geo.vertices[2] = new THREE.Vector3(-size,-size, 0);
+    geo.vertices[3] = new THREE.Vector3(-size, size, 0);
+
+    geo.faces.push(new THREE.Face3(2, 1, 0));
+    geo.faces.push(new THREE.Face3(3, 2, 0));
+    geo.computeFaceNormals();
+
+    return new THREE.Mesh(geo, material);
+  }
+
+  var grid = createGrid();
+  scene.add(grid);
   scene.add(camera);
 
   var light =
