@@ -18,79 +18,9 @@ var quadnet = function(document, canvas_container, width, height) {
       FAR);
 
   var scene = new THREE.Scene();
-
-  var createBulletFactory = function() { 
-    var material =
-      new THREE.MeshPhongMaterial(
-        {
-          color: 0xcccccc,
-          specular: 0x808080,
-          ambient: 0xffffff,
-          emissive: 0x404040,
-          shininess: 10
-        });
-    var geometry = 
-      new THREE.SphereGeometry(
-        2,
-        4,
-        4);
-
-    return function() {
-      return new THREE.Mesh(geometry, material);
-    };
-  }
-
-  var createBullet = createBulletFactory();
-
-  var createShip = function() {
-    var geo =  new THREE.Geometry();
-    var material =
-      new THREE.MeshPhongMaterial(
-        {
-          color: 0x00cc00,
-          specular: 0x808080,
-          ambient: 0xffffff,
-          emissive: 0x004000,
-          shininess: 10
-        });
-
-    geo.vertices[0] = new THREE.Vector3(0, 15, 0);
-    geo.vertices[1] = new THREE.Vector3(10,-15, 0); 
-    geo.vertices[2] = new THREE.Vector3(-10, -15, 0);
-
-    geo.faces.push(new THREE.Face3(2, 1, 0));
-    geo.computeFaceNormals();
-
-    return new THREE.Mesh(geo, material);
-  };
-
-  var createGrid = function() {
-    var geo =  new THREE.Geometry();
-    var material =
-      new THREE.MeshPhongMaterial(
-        {
-          color: 0xff0000,
-          specular: 0x808080,
-          ambient: 0xffffff,
-          emissive: 0x800000,
-          shininess: 10
-        });
-
-    var size = 150;
-    geo.vertices[0] = new THREE.Vector3(size, size, 0);
-    geo.vertices[1] = new THREE.Vector3(size,-size, 0); 
-    geo.vertices[2] = new THREE.Vector3(-size,-size, 0);
-    geo.vertices[3] = new THREE.Vector3(-size, size, 0);
-
-    geo.faces.push(new THREE.Face3(2, 1, 0));
-    geo.faces.push(new THREE.Face3(3, 2, 0));
-    geo.computeFaceNormals();
-
-    return new THREE.Mesh(geo, material);
-  }
-
-  var grid = createGrid();
-  var ship = createShip();
+  var createBullet = Quadnet.objects.createBulletFactory();
+  var grid = Quadnet.objects.createGrid();
+  var ship = Quadnet.objects.createShip();
   ship.position.set(0,0,1);
   scene.add(grid);
   scene.add(ship);
