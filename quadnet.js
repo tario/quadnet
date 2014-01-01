@@ -17,12 +17,13 @@ var quadnet = function(document, canvas_container, width, height) {
     return camera;
   })();
 
+  var square = {left: -160, right: 160, top: 150, bottom: -150};
   var ship = Quadnet.objects.createShip();
 
   var scene = (function() { 
     var scene = new THREE.Scene();
 
-    var grid = Quadnet.objects.createGrid();
+    var grid = Quadnet.objects.createGrid(square);
     ship.position.set(0,0,1);
     scene.add(grid);
     scene.add(ship);
@@ -39,25 +40,55 @@ var quadnet = function(document, canvas_container, width, height) {
 
   var game_state = (function(){
     var createBullet = Quadnet.objects.createBulletFactory();
+    var createAsteroid = Quadnet.objects.createAsteroidFactory();
+
+    var GameObject = function(object3d) {
+    };
+
+    GameObject.prototype = {
+      think: function(){},
+      ondestroy: function(callback) {
+        this.ondestroy_callback = callback;
+      } 
+    };
+
+    var Bullet = function(object3d, dx, dy) {
+      GameObject.call(this,object3d);
+      this.think = function(ticks) {
+        object3d.position.y = object3d.position.y + dy * ticks;
+        object3d.position.x = object3d.position.x + dx * ticks;
+
+        if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
+          scene.remove(object3d);
+          this.ondestroy_callback.call(this);
+        }
+      };
+    };
+    Bullet.prototype = Object.create(GameObject.prototype);
+
+    var Asteroid = function(object3d, dx, dy) {
+      GameObject.call(this,object3d);
+      this.think = function(ticks) {
+        var nextx = object3d.position.x = object3d.position.x + dx * ticks;
+        var nexty = object3d.position.y = object3d.position.y + dy * ticks;
+
+        if (nextx < square.left || nextx > square.right ) dx = -dx;
+        if (nexty < square.bottom || nexty > square.top ) dy = -dy;
+
+        if (nextx < square.left) nextx = nextx + (square.left - nextx) * 2;
+        if (nexty < square.bottom) nexty = nexty + (square.bottom - nexty) * 2;
+        if (nextx > square.right) nextx = nextx + (square.right - nextx) * 2;
+        if (nexty > square.top) nexty = nexty + (square.top - nexty) * 2;
+
+        object3d.position.x = nextx;
+        object3d.position.y = nexty;
+      };
+    };
+    Asteroid.prototype = Object.create(GameObject.prototype);
+
     return {
       objects: [],
       spawnShoot: function(dx, dy) {
-        var Bullet = function(object3d, dx, dy) {
-          var ondestroy_callback = function(){};
-          this.think = function(ticks) {
-            object3d.position.y = object3d.position.y + dy * ticks;
-            object3d.position.x = object3d.position.x + dx * ticks;
-
-            if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
-              scene.remove(object3d);
-              ondestroy_callback.call(this);
-            }
-          };
-          this.ondestroy = function(callback) {
-            ondestroy_callback = callback;
-          }
-        };
-
         var object3d = createBullet();
         object3d.position.set(ship.position.x, ship.position.y, ship.position.z );
         scene.add(object3d);
@@ -69,6 +100,49 @@ var quadnet = function(document, canvas_container, width, height) {
           }
         });
         game_state.objects.push(obj);
+      },
+
+      spawnAsteroid: function() {
+
+        var object3d = createAsteroid();
+
+        var x, y, dx, dy;
+        x = Math.random() * (square.right - square.left) + square.left;
+        y = Math.random() * (square.top - square.bottom) + square.bottom;
+        dx = (Math.round(Math.random()) - 0.5)*0.2;
+        dy = (Math.round(Math.random()) - 0.5)*0.2;
+        // randomize border
+        switch(Math.floor(Math.random()*4)) {
+          case 0.0:
+            y = square.top;
+            dy = -0.1;
+            break;
+          case 1.0:
+            y = square.bottom;
+            dy = 0.1;
+            break;
+          case 2.0:
+            x = square.left;
+            dx = 0.1;
+            break;
+          case 3.0:
+            x = square.right;
+            dx = -0.1;
+            break;
+        }
+
+
+        object3d.position.set(x, y, 1.1);
+        scene.add(object3d);
+        var obj = new Asteroid(object3d, dx, dy);
+        obj.ondestroy(function() {
+          var i = game_state.objects.indexOf(this);
+          if (i>-1){
+            game_state.objects.splice(i,1);
+          }
+        });
+        game_state.objects.push(obj);
+        
       }
     };
   })();
@@ -85,6 +159,8 @@ var quadnet = function(document, canvas_container, width, height) {
         if (e.keyCode == 39) ship_state.right = true;
         if (e.keyCode == 37) ship_state.left = true;
         if (e.keyCode == 40) ship_state.down = true;
+
+        if (e.keyCode == 13) game_state.spawnAsteroid();
       });
       $("body").keyup(function(e){
         if (e.keyCode == 87) ship_state.shoot_up = false;
@@ -124,10 +200,10 @@ var quadnet = function(document, canvas_container, width, height) {
           ship.position.x += velocity;
         }
 
-        if (ship.position.x > 150) ship.position.x = 150;
-        if (ship.position.x < -150) ship.position.x = -150;
-        if (ship.position.y > 150) ship.position.y = 150;
-        if (ship.position.y < -150) ship.position.y = -150;
+        if (ship.position.x < square.left) ship.position.x = square.left;
+        if (ship.position.x > square.right) ship.position.x = square.right;
+        if (ship.position.y > square.top) ship.position.y = square.top;
+        if (ship.position.y < square.bottom) ship.position.y = square.bottom;
 
         weapon_load = weapon_load + ticks;
         var spawnShoot = function(dx, dy) {

@@ -1,7 +1,7 @@
 var Quadnet = Quadnet || {};
 Quadnet.objects = Quadnet.objects || {};
 
-Quadnet.objects.createGrid = function() {
+Quadnet.objects.createGrid = function(square) {
     var geo =  new THREE.Geometry();
     var material =
       new THREE.MeshPhongMaterial(
@@ -13,11 +13,10 @@ Quadnet.objects.createGrid = function() {
           shininess: 10
         });
 
-    var size = 150;
-    geo.vertices[0] = new THREE.Vector3(size, size, 0);
-    geo.vertices[1] = new THREE.Vector3(size,-size, 0); 
-    geo.vertices[2] = new THREE.Vector3(-size,-size, 0);
-    geo.vertices[3] = new THREE.Vector3(-size, size, 0);
+    geo.vertices[0] = new THREE.Vector3(square.right, square.top, 0);
+    geo.vertices[1] = new THREE.Vector3(square.right, square.bottom, 0); 
+    geo.vertices[2] = new THREE.Vector3(square.left, square.bottom, 0);
+    geo.vertices[3] = new THREE.Vector3(square.left, square.top, 0);
 
     geo.faces.push(new THREE.Face3(2, 1, 0));
     geo.faces.push(new THREE.Face3(3, 2, 0));
@@ -71,3 +70,20 @@ Quadnet.objects.createBulletFactory = function() {
     };
 };
 
+Quadnet.objects.createAsteroidFactory = function() { 
+    var material =
+      new THREE.MeshPhongMaterial(
+        {
+          color: 0xcccccc,
+          specular: 0x808080,
+          ambient: 0xffffff,
+          emissive: 0x404040,
+          shininess: 10
+        });
+    var geometry = 
+      new THREE.SphereGeometry(11,8,8);
+
+    return function() {
+      return new THREE.Mesh(geometry, material);
+    };
+};
