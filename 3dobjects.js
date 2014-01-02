@@ -102,7 +102,7 @@ Quadnet.objects.createAsteroidFactory = function() {
           shininess: 10
         });
     var geometry = 
-      new THREE.SphereGeometry(14,8,8);
+      new THREE.SphereGeometry(12,8,8);
 
     return function() {
       return new THREE.Mesh(geometry, material);
