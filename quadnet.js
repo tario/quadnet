@@ -68,9 +68,19 @@ var quadnet = function(document, canvas_container, width, height) {
 
     var Asteroid = function(object3d, dx, dy) {
       GameObject.call(this,object3d);
+
+      // create a random rotation matrix
+      var rotanglex = Math.random()*0.06-0.03;
+      var rotangley = Math.random()*0.06-0.03;
+      var rotanglez = Math.random()*0.06-0.03;
+
       this.think = function(ticks) {
         var nextx = object3d.position.x = object3d.position.x + dx * ticks;
         var nexty = object3d.position.y = object3d.position.y + dy * ticks;
+
+        object3d.rotateX(rotanglex);
+        object3d.rotateY(rotangley);
+        object3d.rotateZ(rotanglez);
 
         if (nextx < square.left || nextx > square.right ) dx = -dx;
         if (nexty < square.bottom || nexty > square.top ) dy = -dy;

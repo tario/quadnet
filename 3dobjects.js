@@ -94,14 +94,15 @@ Quadnet.objects.createAsteroidFactory = function() {
     var material =
       new THREE.MeshPhongMaterial(
         {
-          color: 0xcccccc,
-          specular: 0x808080,
+          color: 0x808080,
+          specular: 0x303030,
           ambient: 0xffffff,
-          emissive: 0x404040,
+          emissive: 0x101010,
+          normalMap: THREE.ImageUtils.loadTexture( "texture/asteroid_normal.jpg" ),
           shininess: 10
         });
     var geometry = 
-      new THREE.SphereGeometry(11,8,8);
+      new THREE.SphereGeometry(14,8,8);
 
     return function() {
       return new THREE.Mesh(geometry, material);
