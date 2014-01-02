@@ -45,18 +45,24 @@ Quadnet.objects.createShip = function() {
     var material =
       new THREE.MeshPhongMaterial(
         {
-          color: 0x00cc00,
-          specular: 0x808080,
-          ambient: 0xffffff,
-          emissive: 0x004000,
-          shininess: 10
+          color: 0x000000,
+          specular: 0xffffff,
+          ambient: 0x000000,
+          emissive: 0x007000,
+          shininess: 4
         });
 
     geo.vertices[0] = new THREE.Vector3(0, 15, 0);
     geo.vertices[1] = new THREE.Vector3(10,-15, 0); 
     geo.vertices[2] = new THREE.Vector3(-10, -15, 0);
 
+    geo.vertices[3] = new THREE.Vector3(0,-15, 10); 
+    geo.vertices[4] = new THREE.Vector3(0, 15, 0);
+    geo.vertices[5] = new THREE.Vector3(0, -15, 0);
+
     geo.faces.push(new THREE.Face3(2, 1, 0));
+    geo.faces.push(new THREE.Face3(3, 4, 5));
+    geo.faces.push(new THREE.Face3(5, 4, 3));
     geo.computeFaceNormals();
 
     return new THREE.Mesh(geo, material);
