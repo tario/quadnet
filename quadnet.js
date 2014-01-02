@@ -185,9 +185,40 @@ var quadnet = function(document, canvas_container, width, height) {
       });
     }
 
-    var weapon_heat = 0.0;
-    var weapon_load = 0.0;
-    var weapon_cooldown = false;
+    var Cannon = function() {
+      var weapon_load = 0.0, weapon_heat = 0.0, weapon_cooldown = false;
+      this.think = function(ticks){
+        weapon_load = weapon_load + ticks;
+        if (weapon_load > 30) {
+          if (weapon_heat > 0.0) {
+            weapon_heat -= 0.5;
+          } else {
+            weapon_cooldown = false;
+          }
+        }
+      };
+
+      this.spawnShoot = function(dx, dy) {
+        if (weapon_load > 30 && weapon_heat < 10 && !weapon_cooldown) {
+          game_state.spawnShoot(dx, dy);
+          weapon_heat = weapon_heat + 1.5;
+          if (weapon_heat > 10) {
+            weapon_cooldown = true;
+          }
+          weapon_load = 0.0;
+        }
+      }
+    };
+
+    Cannon.prototype = {
+      weapon_heat: 0.0,
+      weapon_load: 0.0,
+      weapon_cooldown: false,
+      weapon_elapsed: 0.0
+    };
+
+    var cannon = [new Cannon(), new Cannon(), new Cannon(), new Cannon()];
+
     var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false,
       think: function(ticks) {
         var velocity = ticks * 0.35;
@@ -215,28 +246,14 @@ var quadnet = function(document, canvas_container, width, height) {
         if (ship.position.y > square.top) ship.position.y = square.top;
         if (ship.position.y < square.bottom) ship.position.y = square.bottom;
 
-        weapon_load = weapon_load + ticks;
-        var spawnShoot = function(dx, dy) {
-          game_state.spawnShoot(dx, dy);
-          weapon_heat = weapon_heat + 1.5;
-          weapon_load = 0.0;
-        };
+        cannon.forEach(function(obj){
+          obj.think(ticks);
+        });
 
-        if (weapon_load > 30) {
-          if (weapon_heat < 10 && !weapon_cooldown) {
-              if (this.shoot_up) spawnShoot(0, 0.4);
-              else if (this.shoot_down) spawnShoot(0, -0.4);
-              else if (this.shoot_right) spawnShoot(0.4, 0);
-              else if (this.shoot_left) spawnShoot(-0.4, 0);
-          } else {
-            // cooldown
-            weapon_cooldown = true;
-            if (weapon_heat <= 0.0) {
-              weapon_cooldown = false;
-            }
-          }
-          if (weapon_heat > 0.0) weapon_heat -= 0.5;
-        }
+        if (this.shoot_up) cannon[0].spawnShoot(0, 0.4);
+        else if (this.shoot_down) cannon[1].spawnShoot(0, -0.4);
+        else if (this.shoot_right) cannon[2].spawnShoot(0.4, 0);
+        else if (this.shoot_left) cannon[3].spawnShoot(-0.4, 0);
       }
     };
     implementShipControls(document, ship_state);
