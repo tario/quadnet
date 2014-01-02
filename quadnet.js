@@ -1,20 +1,48 @@
-var quadnet = function(document, canvas_container, width, height) {
+var quadnet = function(document, canvas_container) {
   var origin = new THREE.Vector3(0,0,0);
-  var camera = (function() {
-    var VIEW_ANGLE = 45,
-      ASPECT = width / height,
-      NEAR = 0.1,
-      FAR = 10000;
+  var camera;
+  
+  var newRenderer = function() {
+    try {
+      return new THREE.WebGLRenderer();
+    } catch(err) {
+      return new THREE.CanvasRenderer();
+    }
+  };
 
-    var camera = new THREE.PerspectiveCamera(
-      VIEW_ANGLE,
-      ASPECT,
-      NEAR,
-      FAR);
+  var renderer = newRenderer();
+  renderer.setClearColor(new THREE.Color(0x000000));
+  canvas_container.appendChild(renderer.domElement);
 
-    camera.position.z = 370;
-    camera.lookAt(origin);
-    return camera;
+  (function() {
+
+    var updateCamera = function() {
+      var width = canvas_container.offsetWidth;
+      var height = canvas_container.offsetHeight;
+
+      var VIEW_ANGLE = 45,
+        ASPECT = width / height,
+        NEAR = 0.1,
+        FAR = 10000;
+
+      if (scene) scene.remove(camera);
+      camera = new THREE.PerspectiveCamera(
+        VIEW_ANGLE,
+        ASPECT,
+        NEAR,
+        FAR);
+
+      camera.position.z = 370;
+      camera.lookAt(origin);
+      if (scene) scene.add(camera);
+      renderer.setSize(width, height);
+
+    };
+
+    updateCamera();
+    window.onresize = function() {
+      updateCamera();
+    }
   })();
 
   var square = {left: -160, right: 160, top: 150, bottom: -150};
@@ -292,18 +320,6 @@ var quadnet = function(document, canvas_container, width, height) {
   })();
 
   (function() {
-    var newRenderer = function() {
-      try {
-        return new THREE.WebGLRenderer();
-      } catch(err) {
-        return new THREE.CanvasRenderer();
-      }
-    }
-
-    var renderer = newRenderer();
-    renderer.setSize(width, height);
-    renderer.setClearColor(new THREE.Color(0x000000));
-    canvas_container.appendChild(renderer.domElement);
 
     var think = function(ticks) {
       game_state.objects.forEach(function(obj){
