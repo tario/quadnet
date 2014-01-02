@@ -235,10 +235,12 @@ var quadnet = function(document, canvas_container, width, height) {
 
   (function(){
 
-    var camera_state = {think: function() {
+    var elapsed = 0.0;
+    var camera_state = {think: function(ticks) {
       // camera angle
-      this.anglex = ship.position.x * Math.PI / 330;
-      this.angley = -ship.position.y * Math.PI / 330;
+      elapsed = elapsed + ticks*0.002;
+      this.anglex = (ship.position.x + Math.cos(elapsed)*10) * Math.PI / 390;
+      this.angley = -(ship.position.y + Math.sin(elapsed)*10) * Math.PI / 390;
       
       var updateCameraAngle = function() {
         var rotationMatrix = new THREE.Matrix4();
