@@ -159,7 +159,7 @@ var quadnet = function(document, canvas_container, width, height) {
 
   (function(){
     var implementShipControls = function(document, ship_state) {
-      $("body").keydown(function(e){
+      document.onkeydown = function(e){
         if (e.keyCode == 87) ship_state.shoot_up = true;
         if (e.keyCode == 83) ship_state.shoot_down = true;
         if (e.keyCode == 68) ship_state.shoot_right = true;
@@ -171,8 +171,8 @@ var quadnet = function(document, canvas_container, width, height) {
         if (e.keyCode == 40) ship_state.down = true;
 
         if (e.keyCode == 13) game_state.spawnAsteroid();
-      });
-      $("body").keyup(function(e){
+      };
+      document.onkeyup = function(e){
         if (e.keyCode == 87) ship_state.shoot_up = false;
         if (e.keyCode == 83) ship_state.shoot_down = false;
         if (e.keyCode == 68) ship_state.shoot_right = false;
@@ -182,7 +182,7 @@ var quadnet = function(document, canvas_container, width, height) {
         if (e.keyCode == 39) ship_state.right = false;
         if (e.keyCode == 37) ship_state.left = false;
         if (e.keyCode == 40) ship_state.down = false;
-      });
+      };
     }
 
     var Cannon = function() {
@@ -303,7 +303,7 @@ var quadnet = function(document, canvas_container, width, height) {
     var renderer = newRenderer();
     renderer.setSize(width, height);
     renderer.setClearColor(new THREE.Color(0x000000));
-    canvas_container.append(renderer.domElement);
+    canvas_container.appendChild(renderer.domElement);
 
     var think = function(ticks) {
       game_state.objects.forEach(function(obj){

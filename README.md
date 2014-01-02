@@ -11,7 +11,6 @@ Test the game (in development): http://tario.github.io/quadnet/
 These are the possible dependencies, as well as the project grows maybe other dependencies will be added for sound, social networks, etc...
 
 * Three.js (http://threejs.org/) 
-* jQuery (http://jquery.com/)
 
 ## Development plan
 
