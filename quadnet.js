@@ -82,11 +82,14 @@ var quadnet = function(document, canvas_container) {
       think: function(){},
       ondestroy: function(callback) {
         this.ondestroy_callback = callback;
-      } 
+      },
+      ondestroy_callback: function() {},
+      collision: function(){}
     };
 
     var Bullet = function(object3d, x, y, dx, dy) {
       GameObject.call(this,object3d, x, y);
+      this.radius = 2;
       this.think = function(ticks) {
         this.y = this.y + dy * ticks;
         this.x = this.x + dx * ticks;
@@ -104,10 +107,18 @@ var quadnet = function(document, canvas_container) {
 
     var Asteroid = function(object3d, x, y, dx, dy) {
       GameObject.call(this,object3d, x, y);
-      // create a random rotation matrix
+      this.radius = 12;
+
       var rotanglex = Math.random()*0.06-0.03;
       var rotangley = Math.random()*0.06-0.03;
       var rotanglez = Math.random()*0.06-0.03;
+
+      this.collision = function(obj) {
+        if (obj instanceof Bullet) {
+          scene.remove(object3d);
+          this.ondestroy_callback.call(this);
+        }
+      }
 
       this.think = function(ticks) {
         var nextx = this.x + dx * ticks;
@@ -135,6 +146,9 @@ var quadnet = function(document, canvas_container) {
 
     return {
       objects: [],
+      score: 0,
+      level: 0,
+      stock: 2,
       spawnShoot: function(x, y, dx, dy) {
         var object3d = createBullet();
         scene.add(object3d);
@@ -187,6 +201,14 @@ var quadnet = function(document, canvas_container) {
           if (i>-1){
             game_state.objects.splice(i,1);
           }
+
+          game_state.spawnAsteroid();
+          game_state.stock--;
+          if (game_state.stock == 0){
+            game_state.spawnAsteroid();
+            game_state.level++;
+            game_state.stock = Math.pow(2,game_state.level);
+          } 
         });
         game_state.objects.push(obj);
         
@@ -258,6 +280,7 @@ var quadnet = function(document, canvas_container) {
 
     var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false,
       x: 0, y: 0, radius: 10,
+      collision: function(){},
       think: function(ticks) {
         var velocity = ticks * 0.35;
         if (this.up) {
@@ -337,10 +360,27 @@ var quadnet = function(document, canvas_container) {
     var think = function(ticks) {
       game_state.objects.forEach(function(obj){
         obj.think(ticks);
+
+        game_state.objects.forEach(function(obj2){
+          if (obj2 !== obj) {
+            if (
+              (obj2.x - obj.x)*(obj2.x - obj.x) + 
+              (obj2.y - obj.y)*(obj2.y - obj.y) <
+              obj2.radius * obj2.radius + obj.radius + obj.radius 
+              ) {
+              obj.collision(obj2);
+            }
+          }
+        });
       });
+
+
     };
 
     var last_elapsed = null;
+
+    game_state.spawnAsteroid();
+
     var anim = function(elapsed) { 
       if (last_elapsed) {
         think(elapsed - last_elapsed);
