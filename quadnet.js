@@ -73,6 +73,11 @@ var quadnet = function(document, canvas_container) {
     var GameObject = function(object3d, x, y) {
       this.x = x;
       this.y = y;
+
+      this.destroy = function() {
+        scene.remove(object3d);
+        this.ondestroy_callback.call(this);
+      };
     };
 
     GameObject.prototype = {
@@ -95,8 +100,7 @@ var quadnet = function(document, canvas_container) {
         this.x = this.x + dx * ticks;
 
         if (this.x > 400||this.x < -400||this.y > 400||this.y < -400){
-          scene.remove(object3d);
-          this.ondestroy_callback.call(this);
+          this.destroy();
         }
 
         object3d.position.x = this.x;
@@ -115,8 +119,8 @@ var quadnet = function(document, canvas_container) {
 
       this.collision = function(obj) {
         if (obj instanceof Bullet) {
-          scene.remove(object3d);
-          this.ondestroy_callback.call(this);
+          this.destroy();
+          obj.destroy();
         }
       }
 
