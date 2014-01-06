@@ -16,13 +16,14 @@ var quadnet = function(document, canvas_container) {
   var hud = document.createElement( 'div' );
   canvas_container.appendChild(hud);
   hud.innerHTML = "<style>" +
-    "#quadnet-hud {color: white; font-size: 20px; position: absolute; top: 0;left: 0; width: 100%; height: 100%}" +
-    "#quadnet-hud table {color: white;}" +
+    "@font-face {font-family: emulogic; src: url(emulogic.ttf);}" +
+    "#quadnet-hud {color: white; font-size: 100%; position: absolute; top: 0;left: 0; width: 100%; height: 100%}" +
+    "#quadnet-hud .display, .label {color: white; font-size: 150%; font-family: emulogic}" +
+    "#quadnet-hud table .label {width: 200px}" +
+    "#quadnet-hud table .content.score {width: 150px; text-align: right}" +
     "</style>" +
     "<table>" +
-     "<tr><td>FPS</td><td><div class='fps-display'>60</div></td>" +
-     "<tr><td>LEVEL</td><td><div class='level-display'>0</div></td>" +
-     "<tr><td>LEFT</td><td><div class='left-display'>2</div></td>" +
+     "<tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td>" +
     "</table>";
   hud.id = "quadnet-hud";
   canvas_container.appendChild(renderer.domElement);
@@ -166,6 +167,8 @@ var quadnet = function(document, canvas_container) {
       score: 0,
       level: 0,
       stock: 2,
+      score: 0,
+      bonus_score: 0,
       spawnShoot: function(x, y, dx, dy) {
         var object3d = createBullet();
         scene.add(object3d);
@@ -214,6 +217,11 @@ var quadnet = function(document, canvas_container) {
         scene.add(object3d);
         var obj = new Asteroid(object3d, x, y, dx, dy);
         obj.ondestroy(function() {
+          game_state.score += 400;
+          game_state.score += game_state.bonus_score;
+          game_state.bonus_score += (3000 - game_state.bonus_score) * 0.2;
+
+          document.querySelector("#quadnet-hud .score-display").innerText = Math.round(game_state.score);
           var i = game_state.objects.indexOf(this);
           if (i>-1){
             game_state.objects.splice(i,1);
@@ -224,10 +232,8 @@ var quadnet = function(document, canvas_container) {
           if (game_state.stock == 0){
             game_state.spawnAsteroid();
             game_state.level++;
-            document.querySelector("#quadnet-hud .level-display").innerText = game_state.level;
-            game_state.stock = Math.pow(2,game_state.level);
+            game_state.stock = game_state.level * game_state.level;
           } 
-          document.querySelector("#quadnet-hud .left-display").innerText = game_state.stock;
         });
         game_state.objects.push(obj);
         
@@ -375,19 +381,6 @@ var quadnet = function(document, canvas_container) {
   })();
 
   (function() {
-    var elapsed = 2000;
-    game_state.objects.push({
-      think: function(ticks) {
-        elapsed += ticks;
-        if (elapsed > 200) {
-          document.querySelector("#quadnet-hud .fps-display").innerText = Math.round(1000/ticks);
-          elapsed = 0;
-        }
-      }
-    });
-  })();
-
-  (function() {
 
     var think = function(ticks) {
       game_state.objects.forEach(function(obj){
@@ -404,9 +397,10 @@ var quadnet = function(document, canvas_container) {
             }
           }
         });
+
       });
 
-
+      if (game_state.bonus_score > 0) game_state.bonus_score -= ticks;
     };
 
     var last_elapsed = null;
