@@ -80,87 +80,170 @@ var quadnet = function(document, canvas_container) {
     return scene;
   })();
 
+  var GameObject = function(object3d, x, y) {
+    this.x = x;
+    this.y = y;
+
+    this.destroy = function() {
+      scene.remove(object3d);
+      this.ondestroy_callback.call(this);
+    };
+  };
+
+  GameObject.prototype = {
+    x: 0,
+    y: 0,
+    radius: 10,
+    think: function(){},
+    ondestroy: function(callback) {
+      this.ondestroy_callback = callback;
+    },
+    ondestroy_callback: function() {},
+    collision: function(){}
+  };
+
+  var Ship = function(object3d, x, y) {
+    GameObject.call(this,object3d, x, y);
+
+    var Cannon = function() {
+      var weapon_load = 0.0, weapon_heat = 0.0, weapon_cooldown = false;
+      this.think = function(ticks){
+        weapon_load = weapon_load + ticks;
+        if (weapon_load > 30) {
+          if (weapon_heat > 0.0) {
+            weapon_heat -= 0.5;
+          } else {
+            weapon_cooldown = false;
+          }
+        }
+      };
+
+      this.spawnShoot = function(x, y, dx, dy) {
+        if (weapon_load > 30 && weapon_heat < 10 && !weapon_cooldown) {
+          game_state.spawnShoot(x, y, dx, dy);
+          weapon_heat = weapon_heat + 1.5;
+          if (weapon_heat > 10) {
+            weapon_cooldown = true;
+          }
+          weapon_load = 0.0;
+        }
+      }
+    };
+
+    Cannon.prototype = {
+      weapon_heat: 0.0,
+      weapon_load: 0.0,
+      weapon_cooldown: false,
+      weapon_elapsed: 0.0
+    };
+
+    var cannon = [new Cannon(), new Cannon(), new Cannon(), new Cannon()];
+
+    this.up = false; this.down = false; this.left = false; this.right = false;
+    this.x = 0;
+    this.y = 0;
+    this.radius = 10;
+    this.think = function(ticks) {
+      var velocity = ticks * 0.35;
+      if (this.up) {
+        object3d.rotation.set(0,0,0);
+        this.y += velocity;
+      } else if (this.down) {
+        this.y -= velocity;
+        object3d.rotation.set(0,0,0);
+        object3d.rotateZ(Math.PI);
+      }
+
+      if (this.left) {
+        object3d.rotation.set(0,0,0);
+        object3d.rotateZ(Math.PI/2);
+        this.x -= velocity;
+      } else if (this.right) {
+        object3d.rotation.set(0,0,0);
+        object3d.rotateZ(-Math.PI/2);
+        this.x += velocity;
+      }
+
+      if (this.x < square.left) this.x = square.left;
+      if (this.x > square.right) this.x = square.right;
+      if (this.y > square.top) this.y = square.top;
+      if (this.y < square.bottom) this.y = square.bottom;
+
+      cannon.forEach(function(obj){
+        obj.think(ticks);
+      });
+
+      if (this.shoot_up) cannon[0].spawnShoot(this.x, this.y, 0, 0.4);
+      else if (this.shoot_down) cannon[1].spawnShoot(this.x, this.y, 0, -0.4);
+      else if (this.shoot_right) cannon[2].spawnShoot(this.x, this.y, 0.4, 0);
+      else if (this.shoot_left) cannon[3].spawnShoot(this.x, this.y, -0.4, 0);
+
+      object3d.position.x = this.x;
+      object3d.position.y = this.y;
+    }    
+  };
+  Ship.prototype = Object.create(GameObject.prototype);
+
+  var Bullet = function(object3d, x, y, dx, dy) {
+    GameObject.call(this,object3d, x, y);
+    this.radius = 2;
+    this.think = function(ticks) {
+      this.y = this.y + dy * ticks;
+      this.x = this.x + dx * ticks;
+
+      if (this.x > 400||this.x < -400||this.y > 400||this.y < -400){
+        this.destroy();
+      }
+
+      object3d.position.x = this.x;
+      object3d.position.y = this.y;
+    };
+  };
+  Bullet.prototype = Object.create(GameObject.prototype);
+
+  var Asteroid = function(object3d, x, y, dx, dy) {
+    GameObject.call(this,object3d, x, y);
+    this.radius = 12;
+
+    var rotanglex = Math.random()*0.06-0.03;
+    var rotangley = Math.random()*0.06-0.03;
+    var rotanglez = Math.random()*0.06-0.03;
+
+    this.collision = function(obj) {
+      if (obj instanceof Bullet) {
+        this.destroy();
+        obj.destroy();
+      }
+    }
+
+    this.think = function(ticks) {
+      var nextx = this.x + dx * ticks;
+      var nexty = this.y + dy * ticks;
+
+      object3d.rotateX(rotanglex);
+      object3d.rotateY(rotangley);
+      object3d.rotateZ(rotanglez);
+
+      if (nextx < square.left || nextx > square.right ) dx = -dx;
+      if (nexty < square.bottom || nexty > square.top ) dy = -dy;
+
+      if (nextx < square.left) nextx = nextx + (square.left - nextx) * 2;
+      if (nexty < square.bottom) nexty = nexty + (square.bottom - nexty) * 2;
+      if (nextx > square.right) nextx = nextx + (square.right - nextx) * 2;
+      if (nexty > square.top) nexty = nexty + (square.top - nexty) * 2;
+
+      this.x = nextx;
+      this.y = nexty;
+      object3d.position.x = this.x;
+      object3d.position.y = this.y;
+    };
+  };
+  Asteroid.prototype = Object.create(GameObject.prototype);
+
+
   var game_state = (function(){
     var createBullet = Quadnet.objects.createBulletFactory();
     var createAsteroid = Quadnet.objects.createAsteroidFactory();
-
-    var GameObject = function(object3d, x, y) {
-      this.x = x;
-      this.y = y;
-
-      this.destroy = function() {
-        scene.remove(object3d);
-        this.ondestroy_callback.call(this);
-      };
-    };
-
-    GameObject.prototype = {
-      x: 0,
-      y: 0,
-      radius: 10,
-      think: function(){},
-      ondestroy: function(callback) {
-        this.ondestroy_callback = callback;
-      },
-      ondestroy_callback: function() {},
-      collision: function(){}
-    };
-
-    var Bullet = function(object3d, x, y, dx, dy) {
-      GameObject.call(this,object3d, x, y);
-      this.radius = 2;
-      this.think = function(ticks) {
-        this.y = this.y + dy * ticks;
-        this.x = this.x + dx * ticks;
-
-        if (this.x > 400||this.x < -400||this.y > 400||this.y < -400){
-          this.destroy();
-        }
-
-        object3d.position.x = this.x;
-        object3d.position.y = this.y;
-      };
-    };
-    Bullet.prototype = Object.create(GameObject.prototype);
-
-    var Asteroid = function(object3d, x, y, dx, dy) {
-      GameObject.call(this,object3d, x, y);
-      this.radius = 12;
-
-      var rotanglex = Math.random()*0.06-0.03;
-      var rotangley = Math.random()*0.06-0.03;
-      var rotanglez = Math.random()*0.06-0.03;
-
-      this.collision = function(obj) {
-        if (obj instanceof Bullet) {
-          this.destroy();
-          obj.destroy();
-        }
-      }
-
-      this.think = function(ticks) {
-        var nextx = this.x + dx * ticks;
-        var nexty = this.y + dy * ticks;
-
-        object3d.rotateX(rotanglex);
-        object3d.rotateY(rotangley);
-        object3d.rotateZ(rotanglez);
-
-        if (nextx < square.left || nextx > square.right ) dx = -dx;
-        if (nexty < square.bottom || nexty > square.top ) dy = -dy;
-
-        if (nextx < square.left) nextx = nextx + (square.left - nextx) * 2;
-        if (nexty < square.bottom) nexty = nexty + (square.bottom - nexty) * 2;
-        if (nextx > square.right) nextx = nextx + (square.right - nextx) * 2;
-        if (nexty > square.top) nexty = nexty + (square.top - nexty) * 2;
-
-        this.x = nextx;
-        this.y = nexty;
-        object3d.position.x = this.x;
-        object3d.position.y = this.y;
-      };
-    };
-    Asteroid.prototype = Object.create(GameObject.prototype);
 
     return {
       objects: [],
@@ -269,82 +352,7 @@ var quadnet = function(document, canvas_container) {
       };
     }
 
-    var Cannon = function() {
-      var weapon_load = 0.0, weapon_heat = 0.0, weapon_cooldown = false;
-      this.think = function(ticks){
-        weapon_load = weapon_load + ticks;
-        if (weapon_load > 30) {
-          if (weapon_heat > 0.0) {
-            weapon_heat -= 0.5;
-          } else {
-            weapon_cooldown = false;
-          }
-        }
-      };
-
-      this.spawnShoot = function(x, y, dx, dy) {
-        if (weapon_load > 30 && weapon_heat < 10 && !weapon_cooldown) {
-          game_state.spawnShoot(x, y, dx, dy);
-          weapon_heat = weapon_heat + 1.5;
-          if (weapon_heat > 10) {
-            weapon_cooldown = true;
-          }
-          weapon_load = 0.0;
-        }
-      }
-    };
-
-    Cannon.prototype = {
-      weapon_heat: 0.0,
-      weapon_load: 0.0,
-      weapon_cooldown: false,
-      weapon_elapsed: 0.0
-    };
-
-    var cannon = [new Cannon(), new Cannon(), new Cannon(), new Cannon()];
-
-    var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false,
-      x: 0, y: 0, radius: 10,
-      collision: function(){},
-      think: function(ticks) {
-        var velocity = ticks * 0.35;
-        if (this.up) {
-          ship.rotation.set(0,0,0);
-          this.y += velocity;
-        } else if (this.down) {
-          this.y -= velocity;
-          ship.rotation.set(0,0,0);
-          ship.rotateZ(Math.PI);
-        }
-
-        if (this.left) {
-          ship.rotation.set(0,0,0);
-          ship.rotateZ(Math.PI/2);
-          this.x -= velocity;
-        } else if (this.right) {
-          ship.rotation.set(0,0,0);
-          ship.rotateZ(-Math.PI/2);
-          this.x += velocity;
-        }
-
-        if (this.x < square.left) this.x = square.left;
-        if (this.x > square.right) this.x = square.right;
-        if (this.y > square.top) this.y = square.top;
-        if (this.y < square.bottom) this.y = square.bottom;
-
-        cannon.forEach(function(obj){
-          obj.think(ticks);
-        });
-
-        if (this.shoot_up) cannon[0].spawnShoot(this.x, this.y, 0, 0.4);
-        else if (this.shoot_down) cannon[1].spawnShoot(this.x, this.y, 0, -0.4);
-        else if (this.shoot_right) cannon[2].spawnShoot(this.x, this.y, 0.4, 0);
-        else if (this.shoot_left) cannon[3].spawnShoot(this.x, this.y, -0.4, 0);
-
-        ship.position.x = this.x;
-        ship.position.y = this.y;
-      }
-    };
+    var ship_state = new Ship(ship,0,0);
     implementShipControls(document, ship_state);
     game_state.objects.push(ship_state);
   })();
