@@ -60,25 +60,7 @@ var quadnet = function(document, canvas_container) {
   })();
 
   var square = {left: -160, right: 160, top: 150, bottom: -150};
-  var ship = Quadnet.objects.createShip();
-
-  var scene = (function() { 
-    var scene = new THREE.Scene();
-
-    var grid = Quadnet.objects.createGrid(square);
-    ship.position.set(0,0,1);
-    scene.add(grid);
-    scene.add(ship);
-    scene.add(camera);
-
-    var light =
-      new THREE.DirectionalLight(0xFFFFFF, 1.0);
-    light.position.set(2,1,0)
-
-    scene.add(light);
-
-    return scene;
-  })();
+  var scene;
 
   var GameObject = function(object3d, x, y) {
     this.x = x;
@@ -143,6 +125,15 @@ var quadnet = function(document, canvas_container) {
     this.x = 0;
     this.y = 0;
     this.radius = 10;
+    this.collision = function(obj) {
+      if (obj instanceof Asteroid) {
+        obj.destroy();
+        this.destroy();
+        game_state.lives--;
+        game_state.shouldInitRound = true;
+      }
+    };
+
     this.think = function(ticks) {
       var velocity = ticks * 0.35;
       if (this.up) {
@@ -252,6 +243,99 @@ var quadnet = function(document, canvas_container) {
       stock: 2,
       score: 0,
       bonus_score: 0,
+      shouldInitRound: false,
+      initRound: function() {
+        // remove all objects from scene
+        this.objects = [];
+        scene = (function() { 
+            var scene = new THREE.Scene();
+
+            var grid = Quadnet.objects.createGrid(square);
+            scene.add(grid);
+            scene.add(camera);
+
+            var light =
+              new THREE.DirectionalLight(0xFFFFFF, 1.0);
+            light.position.set(2,1,0)
+
+            scene.add(light);
+
+            return scene;
+          })();
+
+        (function(){
+          var implementShipControls = function(document, ship_state) {
+            document.onkeydown = function(e){
+              if (e.keyCode == 87) ship_state.shoot_up = true;
+              if (e.keyCode == 83) ship_state.shoot_down = true;
+              if (e.keyCode == 68) ship_state.shoot_right = true;
+              if (e.keyCode == 65) ship_state.shoot_left = true;
+
+              if (e.keyCode == 38) ship_state.up = true;
+              if (e.keyCode == 39) ship_state.right = true;
+              if (e.keyCode == 37) ship_state.left = true;
+              if (e.keyCode == 40) ship_state.down = true;
+
+              if (e.keyCode == 13) game_state.spawnAsteroid();
+            };
+            document.onkeyup = function(e){
+              if (e.keyCode == 87) ship_state.shoot_up = false;
+              if (e.keyCode == 83) ship_state.shoot_down = false;
+              if (e.keyCode == 68) ship_state.shoot_right = false;
+              if (e.keyCode == 65) ship_state.shoot_left = false;
+
+              if (e.keyCode == 38) ship_state.up = false;
+              if (e.keyCode == 39) ship_state.right = false;
+              if (e.keyCode == 37) ship_state.left = false;
+              if (e.keyCode == 40) ship_state.down = false;
+            };
+          }
+
+          var ship = Quadnet.objects.createShip();
+          scene.add(ship);
+
+          ship.position.set(0,0,1);
+          var ship_state = new Ship(ship,0,0);
+
+          (function(){
+
+            var elapsed = 0.0;
+            var camera_state = {destroy: function() {},
+              think: function(ticks) {
+              // camera angle
+              elapsed = elapsed + ticks*0.002;
+              this.anglex = (ship.position.x + Math.cos(elapsed)*10) * Math.PI / 390;
+              this.angley = -(ship.position.y + Math.sin(elapsed)*10) * Math.PI / 390;
+              
+              var updateCameraAngle = function() {
+                var rotationMatrix = new THREE.Matrix4();
+                var aux = new THREE.Matrix4();
+
+                aux.makeRotationX(camera_state.angley);
+                rotationMatrix = aux.multiply(rotationMatrix);
+
+                aux = new THREE.Matrix4();
+                aux.makeRotationY(camera_state.anglex);
+                rotationMatrix = aux.multiply(rotationMatrix);
+
+                camera.position.set(0,0,370);
+                camera.position.applyMatrix4(rotationMatrix);
+                camera.lookAt(origin);    
+              };
+              updateCameraAngle();
+
+            }, anglex: 0, angley: 0};
+
+            game_state.objects.push(camera_state);
+          })();
+
+          implementShipControls(document, ship_state);
+          game_state.objects.push(ship_state);
+        })();
+
+        for (var i=0; i<= game_state.level; i++) this.spawnAsteroid();
+      },
+
       spawnShoot: function(x, y, dx, dy) {
         var object3d = createBullet();
         scene.add(object3d);
@@ -324,70 +408,6 @@ var quadnet = function(document, canvas_container) {
     };
   })();
 
-  (function(){
-    var implementShipControls = function(document, ship_state) {
-      document.onkeydown = function(e){
-        if (e.keyCode == 87) ship_state.shoot_up = true;
-        if (e.keyCode == 83) ship_state.shoot_down = true;
-        if (e.keyCode == 68) ship_state.shoot_right = true;
-        if (e.keyCode == 65) ship_state.shoot_left = true;
-
-        if (e.keyCode == 38) ship_state.up = true;
-        if (e.keyCode == 39) ship_state.right = true;
-        if (e.keyCode == 37) ship_state.left = true;
-        if (e.keyCode == 40) ship_state.down = true;
-
-        if (e.keyCode == 13) game_state.spawnAsteroid();
-      };
-      document.onkeyup = function(e){
-        if (e.keyCode == 87) ship_state.shoot_up = false;
-        if (e.keyCode == 83) ship_state.shoot_down = false;
-        if (e.keyCode == 68) ship_state.shoot_right = false;
-        if (e.keyCode == 65) ship_state.shoot_left = false;
-
-        if (e.keyCode == 38) ship_state.up = false;
-        if (e.keyCode == 39) ship_state.right = false;
-        if (e.keyCode == 37) ship_state.left = false;
-        if (e.keyCode == 40) ship_state.down = false;
-      };
-    }
-
-    var ship_state = new Ship(ship,0,0);
-    implementShipControls(document, ship_state);
-    game_state.objects.push(ship_state);
-  })();
-
-  (function(){
-
-    var elapsed = 0.0;
-    var camera_state = {think: function(ticks) {
-      // camera angle
-      elapsed = elapsed + ticks*0.002;
-      this.anglex = (ship.position.x + Math.cos(elapsed)*10) * Math.PI / 390;
-      this.angley = -(ship.position.y + Math.sin(elapsed)*10) * Math.PI / 390;
-      
-      var updateCameraAngle = function() {
-        var rotationMatrix = new THREE.Matrix4();
-        var aux = new THREE.Matrix4();
-
-        aux.makeRotationX(camera_state.angley);
-        rotationMatrix = aux.multiply(rotationMatrix);
-
-        aux = new THREE.Matrix4();
-        aux.makeRotationY(camera_state.anglex);
-        rotationMatrix = aux.multiply(rotationMatrix);
-
-        camera.position.set(0,0,370);
-        camera.position.applyMatrix4(rotationMatrix);
-        camera.lookAt(origin);    
-      };
-      updateCameraAngle();
-
-    }, anglex: 0, angley: 0};
-
-    game_state.objects.push(camera_state);
-  })();
-
   (function() {
 
     var think = function(ticks) {
@@ -409,12 +429,15 @@ var quadnet = function(document, canvas_container) {
       });
 
       if (game_state.bonus_score > 0) game_state.bonus_score -= ticks;
+      if (game_state.shouldInitRound) {
+        game_state.initRound();
+        game_state.shouldInitRound = false;
+      }
     };
 
     var last_elapsed = null;
 
-    game_state.spawnAsteroid();
-
+    game_state.initRound();
     var anim = function(elapsed) { 
       if (last_elapsed) {
         think(elapsed - last_elapsed);
