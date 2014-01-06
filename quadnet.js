@@ -70,41 +70,48 @@ var quadnet = function(document, canvas_container) {
     var createBullet = Quadnet.objects.createBulletFactory();
     var createAsteroid = Quadnet.objects.createAsteroidFactory();
 
-    var GameObject = function(object3d) {
+    var GameObject = function(object3d, x, y) {
+      this.x = x;
+      this.y = y;
     };
 
     GameObject.prototype = {
+      x: 0,
+      y: 0,
+      radius: 10,
       think: function(){},
       ondestroy: function(callback) {
         this.ondestroy_callback = callback;
       } 
     };
 
-    var Bullet = function(object3d, dx, dy) {
-      GameObject.call(this,object3d);
+    var Bullet = function(object3d, x, y, dx, dy) {
+      GameObject.call(this,object3d, x, y);
       this.think = function(ticks) {
-        object3d.position.y = object3d.position.y + dy * ticks;
-        object3d.position.x = object3d.position.x + dx * ticks;
+        this.y = this.y + dy * ticks;
+        this.x = this.x + dx * ticks;
 
-        if (object3d.position.x > 400||object3d.position.x < -400||object3d.position.y > 400||object3d.position.y < -400){
+        if (this.x > 400||this.x < -400||this.y > 400||this.y < -400){
           scene.remove(object3d);
           this.ondestroy_callback.call(this);
         }
+
+        object3d.position.x = this.x;
+        object3d.position.y = this.y;
       };
     };
     Bullet.prototype = Object.create(GameObject.prototype);
 
-    var Asteroid = function(object3d, dx, dy) {
-      GameObject.call(this,object3d);
-
+    var Asteroid = function(object3d, x, y, dx, dy) {
+      GameObject.call(this,object3d, x, y);
       // create a random rotation matrix
       var rotanglex = Math.random()*0.06-0.03;
       var rotangley = Math.random()*0.06-0.03;
       var rotanglez = Math.random()*0.06-0.03;
 
       this.think = function(ticks) {
-        var nextx = object3d.position.x = object3d.position.x + dx * ticks;
-        var nexty = object3d.position.y = object3d.position.y + dy * ticks;
+        var nextx = this.x + dx * ticks;
+        var nexty = this.y + dy * ticks;
 
         object3d.rotateX(rotanglex);
         object3d.rotateY(rotangley);
@@ -118,19 +125,21 @@ var quadnet = function(document, canvas_container) {
         if (nextx > square.right) nextx = nextx + (square.right - nextx) * 2;
         if (nexty > square.top) nexty = nexty + (square.top - nexty) * 2;
 
-        object3d.position.x = nextx;
-        object3d.position.y = nexty;
+        this.x = nextx;
+        this.y = nexty;
+        object3d.position.x = this.x;
+        object3d.position.y = this.y;
       };
     };
     Asteroid.prototype = Object.create(GameObject.prototype);
 
     return {
       objects: [],
-      spawnShoot: function(dx, dy) {
+      spawnShoot: function(x, y, dx, dy) {
         var object3d = createBullet();
-        object3d.position.set(ship.position.x, ship.position.y, ship.position.z );
         scene.add(object3d);
-        var obj = new Bullet(object3d, dx, dy);
+        var obj = new Bullet(object3d, x, y, dx, dy);
+        obj.think(0);
         obj.ondestroy(function() {
           var i = game_state.objects.indexOf(this);
           if (i>-1){
@@ -172,7 +181,7 @@ var quadnet = function(document, canvas_container) {
 
         object3d.position.set(x, y, 1.1);
         scene.add(object3d);
-        var obj = new Asteroid(object3d, dx, dy);
+        var obj = new Asteroid(object3d, x, y, dx, dy);
         obj.ondestroy(function() {
           var i = game_state.objects.indexOf(this);
           if (i>-1){
@@ -226,9 +235,9 @@ var quadnet = function(document, canvas_container) {
         }
       };
 
-      this.spawnShoot = function(dx, dy) {
+      this.spawnShoot = function(x, y, dx, dy) {
         if (weapon_load > 30 && weapon_heat < 10 && !weapon_cooldown) {
-          game_state.spawnShoot(dx, dy);
+          game_state.spawnShoot(x, y, dx, dy);
           weapon_heat = weapon_heat + 1.5;
           if (weapon_heat > 10) {
             weapon_cooldown = true;
@@ -248,13 +257,14 @@ var quadnet = function(document, canvas_container) {
     var cannon = [new Cannon(), new Cannon(), new Cannon(), new Cannon()];
 
     var ship_state = {up: false, down: false, right: false, left: false, shoot_up: false,
+      x: 0, y: 0, radius: 10,
       think: function(ticks) {
         var velocity = ticks * 0.35;
         if (this.up) {
           ship.rotation.set(0,0,0);
-          ship.position.y += velocity;
+          this.y += velocity;
         } else if (this.down) {
-          ship.position.y -= velocity;
+          this.y -= velocity;
           ship.rotation.set(0,0,0);
           ship.rotateZ(Math.PI);
         }
@@ -262,26 +272,29 @@ var quadnet = function(document, canvas_container) {
         if (this.left) {
           ship.rotation.set(0,0,0);
           ship.rotateZ(Math.PI/2);
-          ship.position.x -= velocity;
+          this.x -= velocity;
         } else if (this.right) {
           ship.rotation.set(0,0,0);
           ship.rotateZ(-Math.PI/2);
-          ship.position.x += velocity;
+          this.x += velocity;
         }
 
-        if (ship.position.x < square.left) ship.position.x = square.left;
-        if (ship.position.x > square.right) ship.position.x = square.right;
-        if (ship.position.y > square.top) ship.position.y = square.top;
-        if (ship.position.y < square.bottom) ship.position.y = square.bottom;
+        if (this.x < square.left) this.x = square.left;
+        if (this.x > square.right) this.x = square.right;
+        if (this.y > square.top) this.y = square.top;
+        if (this.y < square.bottom) this.y = square.bottom;
 
         cannon.forEach(function(obj){
           obj.think(ticks);
         });
 
-        if (this.shoot_up) cannon[0].spawnShoot(0, 0.4);
-        else if (this.shoot_down) cannon[1].spawnShoot(0, -0.4);
-        else if (this.shoot_right) cannon[2].spawnShoot(0.4, 0);
-        else if (this.shoot_left) cannon[3].spawnShoot(-0.4, 0);
+        if (this.shoot_up) cannon[0].spawnShoot(this.x, this.y, 0, 0.4);
+        else if (this.shoot_down) cannon[1].spawnShoot(this.x, this.y, 0, -0.4);
+        else if (this.shoot_right) cannon[2].spawnShoot(this.x, this.y, 0.4, 0);
+        else if (this.shoot_left) cannon[3].spawnShoot(this.x, this.y, -0.4, 0);
+
+        ship.position.x = this.x;
+        ship.position.y = this.y;
       }
     };
     implementShipControls(document, ship_state);
