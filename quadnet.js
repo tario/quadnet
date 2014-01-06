@@ -12,6 +12,19 @@ var quadnet = function(document, canvas_container) {
 
   var renderer = newRenderer();
   renderer.setClearColor(new THREE.Color(0x000000));
+
+  var hud = document.createElement( 'div' );
+  canvas_container.appendChild(hud);
+  hud.innerHTML = "<style>" +
+    "#quadnet-hud {color: white; font-size: 20px; position: absolute; top: 0;left: 0; width: 100%; height: 100%}" +
+    "#quadnet-hud table {color: white;}" +
+    "</style>" +
+    "<table>" +
+     "<tr><td>FPS</td><td><div class='fps-display'>60</div></td>" +
+     "<tr><td>LEVEL</td><td><div class='level-display'>0</div></td>" +
+     "<tr><td>LEFT</td><td><div class='left-display'>2</div></td>" +
+    "</table>";
+  hud.id = "quadnet-hud";
   canvas_container.appendChild(renderer.domElement);
 
   (function() {
@@ -211,8 +224,10 @@ var quadnet = function(document, canvas_container) {
           if (game_state.stock == 0){
             game_state.spawnAsteroid();
             game_state.level++;
+            document.querySelector("#quadnet-hud .level-display").innerText = game_state.level;
             game_state.stock = Math.pow(2,game_state.level);
           } 
+          document.querySelector("#quadnet-hud .left-display").innerText = game_state.stock;
         });
         game_state.objects.push(obj);
         
@@ -357,6 +372,19 @@ var quadnet = function(document, canvas_container) {
     }, anglex: 0, angley: 0};
 
     game_state.objects.push(camera_state);
+  })();
+
+  (function() {
+    var elapsed = 2000;
+    game_state.objects.push({
+      think: function(ticks) {
+        elapsed += ticks;
+        if (elapsed > 200) {
+          document.querySelector("#quadnet-hud .fps-display").innerText = Math.round(1000/ticks);
+          elapsed = 0;
+        }
+      }
+    });
   })();
 
   (function() {
