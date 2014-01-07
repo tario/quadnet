@@ -124,7 +124,7 @@ var quadnet = function(document, canvas_container) {
     this.up = false; this.down = false; this.left = false; this.right = false;
     this.x = 0;
     this.y = 0;
-    this.radius = 10;
+    this.radius = 6;
     this.collision = function(obj) {
       if (obj instanceof Asteroid) {
         obj.destroy();
