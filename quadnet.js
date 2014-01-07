@@ -419,7 +419,7 @@ var quadnet = function(document, canvas_container) {
             if (
               (obj2.x - obj.x)*(obj2.x - obj.x) + 
               (obj2.y - obj.y)*(obj2.y - obj.y) <
-              obj2.radius * obj2.radius + obj.radius + obj.radius 
+              (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
               ) {
               obj.collision(obj2);
             }
