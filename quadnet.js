@@ -257,7 +257,20 @@ var quadnet = function(document, canvas_container) {
           scene = (function() { 
               var scene = new THREE.Scene();
 
-              var grid = Quadnet.objects.createGrid(square);
+              var gridMaterial = Quadnet.objects.createGridMaterial();
+              var grid = Quadnet.objects.createGrid(square, gridMaterial);
+              var white = new THREE.Color(0xFFFFFF);
+              var brown = new THREE.Color(0x733108);
+              // flashing grid
+              game_state.objects.push({think: function() {
+                if (game_state.flashing) {
+                  gridMaterial.emissive = white;
+                  game_state.flashing = false;
+                } else {
+                  gridMaterial.emissive = brown;
+                }
+              }});
+
               scene.add(grid);
               scene.add(camera);
 
@@ -395,6 +408,7 @@ var quadnet = function(document, canvas_container) {
             var projection = projector.projectVector(object3d.position, camera);
             sound.explosion(projection);
 
+            game_state.flashing = true;
             game_state.score += 400;
             game_state.score += game_state.bonus_score;
             game_state.bonus_score += (3000 - game_state.bonus_score) * 0.2;
@@ -425,18 +439,19 @@ var quadnet = function(document, canvas_container) {
         game_state.objects.forEach(function(obj){
           obj.think(ticks);
 
-          game_state.objects.forEach(function(obj2){
-            if (obj2 !== obj) {
-              if (
-                (obj2.x - obj.x)*(obj2.x - obj.x) + 
-                (obj2.y - obj.y)*(obj2.y - obj.y) <
-                (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
-                ) {
-                obj.collision(obj2);
+          if (obj.collision) {
+            game_state.objects.forEach(function(obj2){
+              if (obj2.x && obj2 !== obj) {
+                if (
+                  (obj2.x - obj.x)*(obj2.x - obj.x) + 
+                  (obj2.y - obj.y)*(obj2.y - obj.y) <
+                  (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
+                  ) {
+                  obj.collision(obj2);
+                }
               }
-            }
-          });
-
+            });
+          }
         });
 
         if (game_state.bonus_score > 0) game_state.bonus_score -= ticks;

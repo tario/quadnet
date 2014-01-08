@@ -1,7 +1,18 @@
 var Quadnet = Quadnet || {};
 Quadnet.objects = Quadnet.objects || {};
 
-Quadnet.objects.createGrid = function(square) {
+Quadnet.objects.createGridMaterial = function() {
+  return new THREE.MeshPhongMaterial(
+      {
+        color: 0x733108,
+        specular: 0x808080,
+        ambient: 0xffffff,
+        emissive: 0x733108,
+        shininess: 10
+      });
+};
+
+Quadnet.objects.createGrid = function(square, material) {
 
     var createSquare = function(x0, y0, x1, y1) {
       var geo = new THREE.Geometry();
@@ -18,15 +29,6 @@ Quadnet.objects.createGrid = function(square) {
     };
 
     var geo =  new THREE.Geometry();
-    var material =
-      new THREE.MeshPhongMaterial(
-        {
-          color: 0x733108,
-          specular: 0x808080,
-          ambient: 0xffffff,
-          emissive: 0x733108,
-          shininess: 10
-        });
 
     var deltax = square.right - square.left;
     var deltay = square.top - square.bottom;
