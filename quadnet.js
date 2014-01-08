@@ -180,6 +180,11 @@ var quadnet = function(document, canvas_container) {
     var Bullet = function(object3d, x, y, dx, dy) {
       GameObject.call(this,object3d, x, y);
       this.radius = 2;
+      
+      var projector = new THREE.Projector();
+      var projection = projector.projectVector(new THREE.Vector3(x,y,0), camera);
+      sound.shoot(projection);
+
       this.think = function(ticks) {
         this.y = this.y + dy * ticks;
         this.x = this.x + dx * ticks;
@@ -460,7 +465,7 @@ var quadnet = function(document, canvas_container) {
 
   var sfx = [
       {name: 'explosion', path: 'sound/explosion.wav'},
-      {name: 'explosion2', path: 'sound/explosion.wav'}
+      {name: 'shoot', path: 'sound/shoot.ogg'}
       ];
   var sound = {};
   (function() {
