@@ -441,7 +441,7 @@ var quadnet = function(document, canvas_container) {
 
           if (obj.collision) {
             game_state.objects.forEach(function(obj2){
-              if (obj2.x && obj2 !== obj) {
+              if (obj2.x !== undefined && obj2 !== obj) {
                 if (
                   (obj2.x - obj.x)*(obj2.x - obj.x) + 
                   (obj2.y - obj.y)*(obj2.y - obj.y) <
