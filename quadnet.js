@@ -479,7 +479,7 @@ var quadnet = function(document, canvas_container) {
             if (game_state.stock == 0){
               game_state.spawnAsteroid();
               game_state.level++;
-              game_state.stock = game_state.level * game_state.level;
+              game_state.stock = Math.round(Math.pow(game_state.level,2.6));
             } 
           });
           game_state.objects.push(obj);
