@@ -50,7 +50,7 @@ Quadnet.objects.createShip = function() {
           color: 0x007000,
           specular: 0xffffff,
           ambient: 0x000000,
-          emissive: 0x003000,
+          emissive: 0x006000,
           shininess: 4
         });
 
@@ -75,10 +75,10 @@ Quadnet.objects.createBulletFactory = function() {
     var material =
       new THREE.MeshPhongMaterial(
         {
-          color: 0xcccccc,
-          specular: 0x808080,
+          color: 0xffffff,
+          specular: 0xffffff,
           ambient: 0xffffff,
-          emissive: 0x404040,
+          emissive: 0xffffff,
           shininess: 10
         });
     var geometry = 
@@ -96,10 +96,10 @@ Quadnet.objects.createAsteroidFactory = function() {
     var material =
       new THREE.MeshPhongMaterial(
         {
-          color: 0x808080,
-          specular: 0x303030,
+          color: 0xc0c0c0,
+          specular: 0x606060,
           ambient: 0xffffff,
-          emissive: 0x000000,
+          emissive: 0x080808,
           normalMap: THREE.ImageUtils.loadTexture( "texture/asteroid_normal.jpg" ),
           shininess: 10
         });
