@@ -477,11 +477,6 @@ var quadnet = function(document, canvas_container) {
   };
 
   // initialize sound 
-
-  var sfx = [
-      {name: 'explosion', path: 'sound/explosion.ogg'},
-      {name: 'shoot', path: 'sound/shoot.ogg'}
-      ];
   var sound = {};
   (function() {
     var context = new (window.AudioContext || window.webkitAudioContext)();
