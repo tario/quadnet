@@ -238,6 +238,31 @@ var quadnet = function(document, canvas_container) {
     };
     Asteroid.prototype = Object.create(GameObject.prototype);
 
+    var LightStock = function(numlights, hex, distance) {
+      var array = [];
+      var currentIndex = 0;
+      var numlights = 8;
+      for (var i=0; i<numlights; i++) {
+        var light = new THREE.PointLight(hex, 0.0, distance);
+        array.push(light);
+      }
+
+      return {
+        next: function() {
+          var ret = array[currentIndex];
+          currentIndex++;
+          if (currentIndex >= numlights) currentIndex = 0;
+          return ret;
+        },
+
+        lights: function() {
+          return array;
+        }
+      };
+    }
+
+    var explosionLightStock = LightStock(8, 0xFFFFFF, 250);
+    var shootLightStock = LightStock(16, 0xFFFFFF, 100);
 
     var game_state = (function(){
       var createBullet = Quadnet.objects.createBulletFactory();
@@ -275,10 +300,17 @@ var quadnet = function(document, canvas_container) {
               scene.add(camera);
 
               var light =
-                new THREE.DirectionalLight(0xFFFFFF, 1.0);
+                new THREE.DirectionalLight(0xFFFFFF, 0.4);
               light.position.set(2,1,0)
 
               scene.add(light);
+
+              explosionLightStock.lights().forEach(function(obj){
+                scene.add(obj);
+              });
+              shootLightStock.lights().forEach(function(obj){
+                scene.add(obj);
+              });
 
               return scene;
             })();
@@ -358,10 +390,21 @@ var quadnet = function(document, canvas_container) {
 
         spawnShoot: function(x, y, dx, dy) {
           var object3d = createBullet();
+          var light = shootLightStock.next();
+
           scene.add(object3d);
+
+          light.intensity = 0.2;
+          game_state.objects.push({
+            think: function() {
+              light.position.set(obj.x, obj.y, 15);
+            }
+          });
+
           var obj = new Bullet(object3d, x, y, dx, dy);
           obj.think(0);
           obj.ondestroy(function() {
+            light.intensity = 0.0;
             var i = game_state.objects.indexOf(this);
             if (i>-1){
               game_state.objects.splice(i,1);
@@ -407,6 +450,18 @@ var quadnet = function(document, canvas_container) {
             var projector = new THREE.Projector();
             var projection = projector.projectVector(object3d.position, camera);
             sound.explosion(projection);
+
+            var light = explosionLightStock.next();
+            light.position.set(obj.x, obj.y, 15);
+            light.intensity = 1.0;
+
+            for (var i=50; i<=200; i+=50) {
+              (function() {
+                var intensity = (200-i)/200; 
+                var ttl = i;
+                setTimeout(function(){ light.intensity = intensity;  }, ttl);
+              })();
+            }
 
             game_state.flashing = true;
             game_state.score += 400;
