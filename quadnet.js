@@ -88,7 +88,7 @@ var quadnet = function(document, canvas_container) {
 
     var Ship = function(object3d, x, y) {
       GameObject.call(this,object3d, x, y);
-
+      this.collisionable = true;
       var Cannon = function() {
         var weapon_load = 0.0, weapon_heat = 0.0, weapon_cooldown = false;
         this.think = function(ticks){
@@ -177,9 +177,32 @@ var quadnet = function(document, canvas_container) {
     };
     Ship.prototype = Object.create(GameObject.prototype);
 
+    var Particle = function(object3d, x, y, dx, dy, ttl) {
+      GameObject.call(this,object3d, x, y);
+
+      this.x = x;
+      this.y = y;
+      var elapsed = 0.0;
+
+      this.think = function(ticks) {
+        elapsed+= ticks;
+        this.y = this.y + dy * ticks;
+        this.x = this.x + dx * ticks;
+
+        if (elapsed > ttl) {
+          this.destroy();
+        }
+
+        object3d.position.x = this.x;
+        object3d.position.y = this.y;
+      };
+    };
+    Particle.prototype = Object.create(GameObject.prototype);
+
     var Bullet = function(object3d, x, y, dx, dy) {
       GameObject.call(this,object3d, x, y);
       this.radius = 2;
+      this.collisionable = true;
       
       var projector = new THREE.Projector();
       var projection = projector.projectVector(new THREE.Vector3(x,y,0), camera);
@@ -202,6 +225,7 @@ var quadnet = function(document, canvas_container) {
     var Asteroid = function(object3d, x, y, dx, dy) {
       GameObject.call(this,object3d, x, y);
       this.radius = 12;
+      this.collisionable = true;
 
       var rotanglex = Math.random()*0.06-0.03;
       var rotangley = Math.random()*0.06-0.03;
@@ -267,6 +291,9 @@ var quadnet = function(document, canvas_container) {
     var game_state = (function(){
       var createBullet = Quadnet.objects.createBulletFactory();
       var createAsteroid = Quadnet.objects.createAsteroidFactory();
+      var createRedParticle = Quadnet.objects.createParticleFactory(0xFF0000);
+      var createWhiteParticle = Quadnet.objects.createParticleFactory(0xFFFFFF);
+      var createYellowParticle = Quadnet.objects.createParticleFactory(0xFFFF00);
 
       return {
         objects: [],
@@ -449,6 +476,36 @@ var quadnet = function(document, canvas_container) {
           obj.ondestroy(function() {
             var projector = new THREE.Projector();
             var projection = projector.projectVector(object3d.position, camera);
+
+            function spawnParticle(type, x, y, dx, dy) {
+              var object3d = type();
+              object3d.position.set(x, y, 1.1);
+              scene.add(object3d);
+              obj = new Particle(object3d, x, y, dx, dy, 500);
+              obj.ondestroy(function() {
+                var i = game_state.objects.indexOf(this);
+                if (i>-1){
+                  game_state.objects.splice(i,1);
+                }
+              });
+              game_state.objects.push(obj);
+            };
+
+            for (var i=0; i<12; i++)
+              spawnParticle(createWhiteParticle, obj.x, obj.y, (Math.random()-0.5)*0.4 ,(Math.random()-0.5)*0.4);
+
+            for (var i=0; i<16; i++) {
+              (function() {
+                var dx = Math.cos(i*Math.PI/8);
+                var dy = Math.sin(i*Math.PI/8);
+                spawnParticle(createRedParticle, obj.x, obj.y, dx*0.07 ,dy*0.07);
+                spawnParticle(createRedParticle, obj.x, obj.y, dx*0.085 ,dy*0.085);
+                spawnParticle(createRedParticle, obj.x, obj.y, dx*0.1 ,dy*0.1);
+                spawnParticle(createYellowParticle, obj.x, obj.y, dx*0.115 ,dy*0.115);
+                spawnParticle(createYellowParticle, obj.x, obj.y, dx*0.13 ,dy*0.13);
+              })();
+            }
+
             sound.explosion(projection);
 
             var light = explosionLightStock.next();
@@ -479,7 +536,7 @@ var quadnet = function(document, canvas_container) {
             if (game_state.stock == 0){
               game_state.spawnAsteroid();
               game_state.level++;
-              game_state.stock = Math.round(Math.pow(game_state.level,2.6));
+              game_state.stock = Math.round(Math.pow(game_state.level+1,2.6));
             } 
           });
           game_state.objects.push(obj);
@@ -494,15 +551,17 @@ var quadnet = function(document, canvas_container) {
         game_state.objects.forEach(function(obj){
           obj.think(ticks);
 
-          if (obj.collision) {
+          if (obj.collision && obj.collisionable) {
             game_state.objects.forEach(function(obj2){
-              if (obj2.x !== undefined && obj2 !== obj) {
-                if (
-                  (obj2.x - obj.x)*(obj2.x - obj.x) + 
-                  (obj2.y - obj.y)*(obj2.y - obj.y) <
-                  (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
-                  ) {
-                  obj.collision(obj2);
+              if (obj2.collisionable) {
+                if (obj2.x !== undefined && obj2 !== obj) {
+                  if (
+                    (obj2.x - obj.x)*(obj2.x - obj.x) + 
+                    (obj2.y - obj.y)*(obj2.y - obj.y) <
+                    (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
+                    ) {
+                    obj.collision(obj2);
+                  }
                 }
               }
             });

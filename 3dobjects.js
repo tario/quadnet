@@ -1,6 +1,27 @@
 var Quadnet = Quadnet || {};
 Quadnet.objects = Quadnet.objects || {};
 
+Quadnet.objects.createParticleFactory = function(color) {
+    var material =
+      new THREE.MeshPhongMaterial(
+        {
+          color: color,
+          specular: 0x000000,
+          ambient: 0x000000,
+          emissive: color,
+          shininess: 10
+        });
+    var geometry = 
+      new THREE.SphereGeometry(
+        1.3,
+        2,
+        2);
+
+    return function() {
+      return new THREE.Mesh(geometry, material);
+    };
+};
+
 Quadnet.objects.createGridMaterial = function() {
   return new THREE.MeshPhongMaterial(
       {
@@ -82,10 +103,7 @@ Quadnet.objects.createBulletFactory = function() {
           shininess: 10
         });
     var geometry = 
-      new THREE.SphereGeometry(
-        2,
-        4,
-        4);
+      new THREE.SphereGeometry(1.5,2,2);
 
     return function() {
       return new THREE.Mesh(geometry, material);
