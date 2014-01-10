@@ -303,6 +303,12 @@ var quadnet = function(document, canvas_container) {
         score: 0,
         bonus_score: 0,
         shouldInitRound: false,
+        removeObject: function(obj) {
+          var i = this.objects.indexOf(obj);
+          if (i>-1){
+            this.objects.splice(i,1);
+          }          
+        },
         initRound: function() {
           // remove all objects from scene
           this.objects = [];
@@ -422,20 +428,19 @@ var quadnet = function(document, canvas_container) {
           scene.add(object3d);
 
           light.intensity = 0.2;
-          game_state.objects.push({
+          var lightControl = {
             think: function() {
               light.position.set(obj.x, obj.y, 15);
             }
-          });
+          };
+          game_state.objects.push(lightControl);
 
           var obj = new Bullet(object3d, x, y, dx, dy);
           obj.think(0);
           obj.ondestroy(function() {
             light.intensity = 0.0;
-            var i = game_state.objects.indexOf(this);
-            if (i>-1){
-              game_state.objects.splice(i,1);
-            }
+            game_state.removeObject(this);
+            game_state.removeObject(lightControl);
           });
           game_state.objects.push(obj);
         },
@@ -481,12 +486,9 @@ var quadnet = function(document, canvas_container) {
               var object3d = type();
               object3d.position.set(x, y, 1.1);
               scene.add(object3d);
-              obj = new Particle(object3d, x, y, dx, dy, 500);
+              obj = new Particle(object3d, x, y, dx, dy, 400);
               obj.ondestroy(function() {
-                var i = game_state.objects.indexOf(this);
-                if (i>-1){
-                  game_state.objects.splice(i,1);
-                }
+                game_state.removeObject(this);
               });
               game_state.objects.push(obj);
             };
@@ -526,10 +528,8 @@ var quadnet = function(document, canvas_container) {
             game_state.bonus_score += (3000 - game_state.bonus_score) * 0.2;
 
             document.querySelector("#quadnet-hud .score-display").innerText = Math.round(game_state.score);
-            var i = game_state.objects.indexOf(this);
-            if (i>-1){
-              game_state.objects.splice(i,1);
-            }
+
+            game_state.removeObject(this);
 
             game_state.spawnAsteroid();
             game_state.stock--;
