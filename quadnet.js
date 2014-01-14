@@ -71,6 +71,8 @@ var quadnet = function(document, canvas_container) {
       this.y = y;
 
       this.destroy = function() {
+        if (this.destroyed) return;
+        this.destroyed = true;
         scene.remove(object3d);
         this.ondestroy_callback.call(this);
       };
