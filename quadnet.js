@@ -304,10 +304,7 @@ var quadnet = function(document, canvas_container) {
         bonus_score: 0,
         shouldInitRound: false,
         removeObject: function(obj) {
-          var i = this.objects.indexOf(obj);
-          if (i>-1){
-            this.objects.splice(i,1);
-          }          
+          obj.removed = true;
         },
         initRound: function() {
           // remove all objects from scene
@@ -549,6 +546,8 @@ var quadnet = function(document, canvas_container) {
 
       var think = function(ticks) {
         game_state.objects.forEach(function(obj){
+          if (obj.removed) return;
+
           obj.think(ticks);
 
           if (obj.collision && obj.collisionable) {
@@ -566,6 +565,10 @@ var quadnet = function(document, canvas_container) {
               }
             });
           }
+        });
+
+        game_state.objects = game_state.objects.filter(function(obj) {
+          return !obj.removed;
         });
 
         if (game_state.bonus_score > 0) game_state.bonus_score -= ticks;
