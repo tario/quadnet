@@ -195,6 +195,12 @@ var quadnet = function(document, canvas_container) {
           this.destroy();
         }
 
+        if (elapsed < ttl*0.5) {
+          object3d.material.opacity = 1.0;
+        } else {
+          object3d.material.opacity = 2*(ttl-elapsed)/ttl;
+        }
+
         object3d.position.x = this.x;
         object3d.position.y = this.y;
       };
