@@ -306,7 +306,7 @@ var quadnet = function(document, canvas_container) {
       return {
         objects: [],
         score: 0,
-        level: 0,
+        level: 1,
         stock: 2,
         score: 0,
         bonus_score: 0,
@@ -423,7 +423,7 @@ var quadnet = function(document, canvas_container) {
             game_state.objects.push(ship_state);
           })();
 
-          for (var i=0; i<= game_state.level; i++) this.spawnAsteroid();
+          for (var i=0; i<game_state.level; i++) this.spawnAsteroid();
         },
 
         spawnShoot: function(x, y, dx, dy) {
@@ -541,7 +541,7 @@ var quadnet = function(document, canvas_container) {
             if (game_state.stock == 0){
               game_state.spawnAsteroid();
               game_state.level++;
-              game_state.stock = Math.round(Math.pow(game_state.level+1,2.6));
+              game_state.stock = Math.round(Math.pow(game_state.level,2.6));
             } 
           });
           game_state.objects.push(obj);
