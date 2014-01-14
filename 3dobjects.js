@@ -2,23 +2,16 @@ var Quadnet = Quadnet || {};
 Quadnet.objects = Quadnet.objects || {};
 
 Quadnet.objects.createParticleFactory = function(color) {
-    var material =
-      new THREE.MeshPhongMaterial(
-        {
-          color: color,
-          specular: 0x000000,
-          ambient: 0x000000,
-          emissive: color,
-          shininess: 10
-        });
-    var geometry = 
-      new THREE.SphereGeometry(
-        1.3,
-        2,
-        2);
+    var spriteMaterial =
+     new THREE.SpriteMaterial( { 
+        map: THREE.ImageUtils.loadTexture('texture/particle.png'), 
+        useScreenCoordinates: false, 
+        color: color } );
 
     return function() {
-      return new THREE.Mesh(geometry, material);
+      var sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set( 3, 3, 1.0 );
+      return sprite;
     };
 };
 
@@ -93,20 +86,16 @@ Quadnet.objects.createShip = function() {
 
 
 Quadnet.objects.createBulletFactory = function() { 
-    var material =
-      new THREE.MeshPhongMaterial(
-        {
-          color: 0xffffff,
-          specular: 0xffffff,
-          ambient: 0xffffff,
-          emissive: 0xffffff,
-          shininess: 10
-        });
-    var geometry = 
-      new THREE.SphereGeometry(1.5,2,2);
+    var spriteMaterial =
+     new THREE.SpriteMaterial( { 
+        map: THREE.ImageUtils.loadTexture('texture/particle.png'), 
+        useScreenCoordinates: false, 
+        color: 0xffffff } );
 
     return function() {
-      return new THREE.Mesh(geometry, material);
+      var sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set( 3, 3, 1.0 );
+      return sprite;
     };
 };
 
