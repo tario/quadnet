@@ -30,11 +30,13 @@ var quadnet = function(document, canvas_container) {
     hud.id = "quadnet-hud";
     canvas_container.appendChild(renderer.domElement);
 
+    var width, height;
+
     (function() {
 
       var updateCamera = function() {
-        var width = canvas_container.offsetWidth;
-        var height = canvas_container.offsetHeight;
+        width = canvas_container.offsetWidth;
+        height = canvas_container.offsetHeight;
 
         var VIEW_ANGLE = 45,
           ASPECT = width / height,
@@ -483,7 +485,7 @@ var quadnet = function(document, canvas_container) {
               var object3d = type();
               object3d.position.set(x, y, 1.1);
               scene.add(object3d);
-              obj = new Particle(object3d, x, y, dx, dy, 400);
+              obj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
               obj.ondestroy(function() {
                 game_state.removeObject(this);
               });

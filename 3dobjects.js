@@ -5,12 +5,12 @@ Quadnet.objects.createParticleFactory = function(color) {
     var spriteMaterial =
      new THREE.SpriteMaterial( { 
         map: THREE.ImageUtils.loadTexture('texture/particle.png'), 
-        useScreenCoordinates: false, 
+        useScreenCoordinates: true, 
         color: color } );
 
     return function() {
       var sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set( 3, 3, 1.0 );
+      sprite.scale.set( 6, 6, 1.0 );
       return sprite;
     };
 };
