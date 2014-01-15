@@ -367,8 +367,6 @@ var quadnet = function(document, canvas_container) {
                 if (e.keyCode == 39) ship_state.right = true;
                 if (e.keyCode == 37) ship_state.left = true;
                 if (e.keyCode == 40) ship_state.down = true;
-
-                if (e.keyCode == 13) game_state.spawnAsteroid();
               };
               document.onkeyup = function(e){
                 if (e.keyCode == 87) ship_state.shoot_up = false;
