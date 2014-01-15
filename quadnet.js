@@ -216,7 +216,7 @@ var quadnet = function(document, canvas_container) {
       
       var projector = new THREE.Projector();
       var projection = projector.projectVector(new THREE.Vector3(x,y,0), camera);
-      sound.shoot(projection);
+      Quadnet.sound.shoot(projection);
 
       this.think = function(ticks) {
         this.y = this.y + dy * ticks;
@@ -513,7 +513,7 @@ var quadnet = function(document, canvas_container) {
               })();
             }
 
-            sound.explosion(projection);
+            Quadnet.sound.explosion(projection);
 
             var light = explosionLightStock.next();
             light.position.set(obj.x, obj.y, 15);
@@ -601,62 +601,5 @@ var quadnet = function(document, canvas_container) {
     })();
   };
 
-  // initialize sound 
-  var sound = {};
-  (function() {
-    var context = new (window.AudioContext || window.webkitAudioContext)();
-
-    var load = function(name, path) {
-      return new Promise(function(resolve, reject) {
-        var request = new XMLHttpRequest();
-        request.open("GET", path, true);
-        request.responseType = "arraybuffer";
-        request.onerror = function(e) {
-          console.error("Cannot load sound file '"+name+"' ("+path+")");
-          sound[name] = function(sourcePosition) {
-            // DO nothing
-          }
-          resolve();
-        };
-
-        request.onload = function(e) {
-          context.decodeAudioData(request.response, function (buffer) {
-            sound[name] = function(sourcePosition) {
-              var panner = context.createPanner();
-              bufferSource = context.createBufferSource();
-
-              var zDeg = sourcePosition.x * 45 + 90;
-              if (zDeg > 90) zDeg = 180 - zDeg;
-
-              var sound_x = Math.sin(sourcePosition.x * 45 * (Math.PI / 180));
-              var sound_z = Math.sin(zDeg * (Math.PI / 180));
-              panner.setPosition(sound_x, 0, sound_z);
-
-              bufferSource.connect(panner);
-              panner.connect(context.destination);
-
-              bufferSource.buffer = buffer;
-              bufferSource.start(context.currentTime);
-            };
-
-            resolve();
-          }, function(){
-            console.error("Cannot decode sound file '"+name+"' ("+path+")");
-            sound[name] = function(sourcePosition) {
-              // DO nothing
-            };
-            resolve(); 
-          });
-        };
-
-        request.send();
-      });
-    };
-
-    Promise.all([
-      load('explosion', 'sound/explosion.ogg'),
-      load('shoot', 'sound/shoot.ogg')
-      ]).then(main);
-
-  })();
+  Quadnet.prepareResources().then(main);
 };
