@@ -516,7 +516,7 @@ var quadnet = function(document, canvas_container) {
             Quadnet.sound.explosion(projection);
 
             var light = explosionLightStock.next();
-            light.position.set(obj.x, obj.y, 15);
+            light.position.set(this.x, this.y, 15);
             light.intensity = 1.0;
 
             for (var i=50; i<=200; i+=50) {
