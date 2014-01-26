@@ -503,10 +503,10 @@ var quadnet = function(document, canvas_container) {
             for (var i=0; i<12; i++)
               spawnParticle(createWhiteParticle, obj.x, obj.y, (Math.random()-0.5)*0.4 ,(Math.random()-0.5)*0.4);
 
-            for (var i=0; i<16; i++) {
+            for (var i=0; i<32; i++) {
               (function() {
-                var dx = Math.cos(i*Math.PI/8);
-                var dy = Math.sin(i*Math.PI/8);
+                var dx = Math.cos(i*Math.PI/16);
+                var dy = Math.sin(i*Math.PI/16);
                 spawnParticle(createRedParticle, obj.x, obj.y, dx*0.07 ,dy*0.07);
                 spawnParticle(createRedParticle, obj.x, obj.y, dx*0.085 ,dy*0.085);
                 spawnParticle(createRedParticle, obj.x, obj.y, dx*0.1 ,dy*0.1);
