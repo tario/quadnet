@@ -1,6 +1,8 @@
 var quadnet = function(document, canvas_container) {
   var main = function() {
 
+    Quadnet.music.game({loop: true});
+
     var origin = new THREE.Vector3(0,0,0);
     var camera;
     

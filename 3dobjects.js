@@ -1,11 +1,50 @@
 var Quadnet = Quadnet || {};
 Quadnet.objects = Quadnet.objects || {};
 Quadnet.sound = Quadnet.sound || {};
+Quadnet.music = Quadnet.music || {};
 
 Quadnet.prepareResources = function() { 
   var textures = {};
 
   var context = new (window.AudioContext || window.webkitAudioContext)();
+
+  var loadMusic = function(name, path) {
+    return new Promise(function(resolve, reject) {
+      var whenReady = function(){};
+      Quadnet.music[name] = function(options) {
+        whenReady = function() {
+          Quadnet.music[name](options);
+        };
+      };
+
+      var request = new XMLHttpRequest();
+      request.open("GET", path, true);
+      request.responseType = "arraybuffer";
+      request.onerror = function(e) {
+        console.error("Cannot load music file '"+name+"' ("+path+")");
+      };
+
+      request.onload = function(e) {
+        context.decodeAudioData(request.response, function (buffer) {
+          Quadnet.music[name] = function(options) {
+            var bufferSource = context.createBufferSource();
+            options = options || {};
+            bufferSource.connect(context.destination);
+            bufferSource.loop = options.loop;
+            bufferSource.buffer = buffer;
+            bufferSource.start(context.currentTime);
+          };
+
+          whenReady();
+        }, function(){
+          console.error("Cannot decode music file '"+name+"' ("+path+")");
+        });
+      };
+
+      request.send();
+      resolve();
+    });
+  };
 
   var loadSound = function(name, path) {
     return new Promise(function(resolve, reject) {
@@ -24,7 +63,7 @@ Quadnet.prepareResources = function() {
         context.decodeAudioData(request.response, function (buffer) {
           Quadnet.sound[name] = function(sourcePosition) {
             var panner = context.createPanner();
-            bufferSource = context.createBufferSource();
+            var bufferSource = context.createBufferSource();
 
             var zDeg = sourcePosition.x * 45 + 90;
             if (zDeg > 90) zDeg = 180 - zDeg;
@@ -182,6 +221,7 @@ Quadnet.prepareResources = function() {
     loadTexture('particleTexture', 'texture/particle.png'),
     loadTexture('asteroidNormalMap', 'texture/asteroid_normal.jpg'),
     loadSound('explosion', 'sound/explosion.ogg'),
-    loadSound('shoot', 'sound/shoot.ogg')]);
+    loadSound('shoot', 'sound/shoot.ogg'),
+    loadMusic('game', 'music/game.ogg')]);
 
 };
