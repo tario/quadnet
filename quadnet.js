@@ -93,7 +93,9 @@ var quadnet = function(document, canvas_container) {
       checkForCollision: function() {
         var obj = this;
         if (obj.collision) {
-          game_state.objects.forEach(function(obj2){
+          var objects = game_state.objects;
+          for (var i=0; i<objects.length; i++) {
+            var obj2 = objects[i];
             if (obj2.collisionable) {
               if (obj2.x !== undefined && obj2 !== obj) {
                 if (
@@ -105,7 +107,7 @@ var quadnet = function(document, canvas_container) {
                 }
               }
             }
-          });
+          };
         }
       }
     };
@@ -186,9 +188,9 @@ var quadnet = function(document, canvas_container) {
         if (this.y > square.top) this.y = square.top;
         if (this.y < square.bottom) this.y = square.bottom;
 
-        cannon.forEach(function(obj){
-          obj.think(ticks);
-        });
+        for (var i=0; i<cannon.length; i++) {
+          cannon[i].think(ticks);
+        };
 
         if (this.shoot_up) cannon[0].spawnShoot(this.x, this.y, 0, 0.4);
         else if (this.shoot_down) cannon[1].spawnShoot(this.x, this.y, 0, -0.4);
@@ -582,15 +584,18 @@ var quadnet = function(document, canvas_container) {
     (function() {
 
       var think = function(ticks) {
-        game_state.objects.forEach(function(obj){
-          if (obj.removed) return;
+        for (var i=0; i<game_state.objects.length; i++) {
+          var obj = game_state.objects[i];
+          if (!obj.removed) obj.think(ticks);
+        };
 
-          obj.think(ticks);
-        });
+        var newObjects = [];
+        for (var i=0; i<game_state.objects.length; i++) {
+          var obj = game_state.objects[i]
+          if (!obj.removed) newObjects.push(obj);
+        };
 
-        game_state.objects = game_state.objects.filter(function(obj) {
-          return !obj.removed;
-        });
+        game_state.objects = newObjects;
 
         if (game_state.bonus_score > 0) game_state.bonus_score -= ticks;
         if (game_state.shouldInitRound) {
