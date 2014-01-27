@@ -562,6 +562,7 @@ var quadnet = function(document, canvas_container) {
             game_state.score += 400;
             game_state.score += game_state.bonus_score;
             game_state.bonus_score += (3000 - game_state.bonus_score) * 0.2;
+            if (game_state.bonus_score < 0) game_state.bonus_score = 0;
 
             document.querySelector("#quadnet-hud .score-display").innerText = Math.round(game_state.score);
 
@@ -598,6 +599,7 @@ var quadnet = function(document, canvas_container) {
         game_state.objects = newObjects;
 
         if (game_state.bonus_score > 0) game_state.bonus_score -= ticks;
+        if (game_state.bonus_score < 0) game_state.bonus_score = 0;
         if (game_state.shouldInitRound) {
           game_state.initRound();
           game_state.shouldInitRound = false;
