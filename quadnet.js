@@ -89,12 +89,29 @@ var quadnet = function(document, canvas_container) {
         this.ondestroy_callback = callback;
       },
       ondestroy_callback: function() {},
-      collision: function(){}
+      collision: function(){},
+      checkForCollision: function() {
+        var obj = this;
+        if (obj.collision) {
+          game_state.objects.forEach(function(obj2){
+            if (obj2.collisionable) {
+              if (obj2.x !== undefined && obj2 !== obj) {
+                if (
+                  (obj2.x - obj.x)*(obj2.x - obj.x) + 
+                  (obj2.y - obj.y)*(obj2.y - obj.y) <
+                  (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
+                  ) {
+                  obj.collision(obj2);
+                }
+              }
+            }
+          });
+        }
+      }
     };
 
     var Ship = function(object3d, x, y) {
       GameObject.call(this,object3d, x, y);
-      this.collisionable = true;
       var Cannon = function() {
         var weapon_load = 0.0, weapon_heat = 0.0, weapon_cooldown = false;
         this.think = function(ticks){
@@ -106,6 +123,7 @@ var quadnet = function(document, canvas_container) {
               weapon_cooldown = false;
             }
           }
+
         };
 
         this.spawnShoot = function(x, y, dx, dy) {
@@ -179,6 +197,7 @@ var quadnet = function(document, canvas_container) {
 
         object3d.position.x = this.x;
         object3d.position.y = this.y;
+        this.checkForCollision();
       }    
     };
     Ship.prototype = Object.create(GameObject.prototype);
@@ -270,6 +289,8 @@ var quadnet = function(document, canvas_container) {
         this.y = nexty;
         object3d.position.x = this.x;
         object3d.position.y = this.y;
+
+        this.checkForCollision();
       };
     };
     Asteroid.prototype = Object.create(GameObject.prototype);
@@ -565,22 +586,6 @@ var quadnet = function(document, canvas_container) {
           if (obj.removed) return;
 
           obj.think(ticks);
-
-          if (obj.collision && obj.collisionable) {
-            game_state.objects.forEach(function(obj2){
-              if (obj2.collisionable) {
-                if (obj2.x !== undefined && obj2 !== obj) {
-                  if (
-                    (obj2.x - obj.x)*(obj2.x - obj.x) + 
-                    (obj2.y - obj.y)*(obj2.y - obj.y) <
-                    (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
-                    ) {
-                    obj.collision(obj2);
-                  }
-                }
-              }
-            });
-          }
         });
 
         game_state.objects = game_state.objects.filter(function(obj) {
