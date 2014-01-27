@@ -65,7 +65,7 @@ var quadnet = function(document, canvas_container) {
       }
     })();
 
-    var square = {left: -160, right: 160, top: 150, bottom: -150};
+    var square = {left: -150, right: 150, top: 150, bottom: -150};
     var scene;
 
     var GameObject = function(object3d, x, y) {
