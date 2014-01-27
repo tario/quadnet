@@ -1,50 +1,35 @@
 var Quadnet = Quadnet || {};
 Quadnet.objects = Quadnet.objects || {};
 Quadnet.sound = Quadnet.sound || {};
-Quadnet.music = Quadnet.music || {};
+Quadnet.music = Quadnet.music || (function() {
+      var setCurrent = function(newcurrent) {
+        ret.pause = newcurrent.pause.bind(newcurrent);
+        ret.stop = function(){
+          newcurrent.pause();
+          newcurrent.currentTime = 0;
+        };
+        ret.play = function() {
+          newcurrent.play();
+        };
+      };
+
+      var ret = {stop: function(){}, pause: function(){}};
+      var music = ["game"]; 
+      music.forEach(function(entry) {
+        audioElement = new Audio("music/" + entry + ".ogg");
+        audioElement.loop = true;
+        ret[entry] = function() {
+          setCurrent(audioElement);
+          ret.play();
+        };
+      });
+      return ret;
+    })();
 
 Quadnet.prepareResources = function() { 
   var textures = {};
 
   var context = new (window.AudioContext || window.webkitAudioContext)();
-
-  var loadMusic = function(name, path) {
-    return new Promise(function(resolve, reject) {
-      var whenReady = function(){};
-      Quadnet.music[name] = function(options) {
-        whenReady = function() {
-          Quadnet.music[name](options);
-        };
-      };
-
-      var request = new XMLHttpRequest();
-      request.open("GET", path, true);
-      request.responseType = "arraybuffer";
-      request.onerror = function(e) {
-        console.error("Cannot load music file '"+name+"' ("+path+")");
-      };
-
-      request.onload = function(e) {
-        context.decodeAudioData(request.response, function (buffer) {
-          Quadnet.music[name] = function(options) {
-            var bufferSource = context.createBufferSource();
-            options = options || {};
-            bufferSource.connect(context.destination);
-            bufferSource.loop = options.loop;
-            bufferSource.buffer = buffer;
-            bufferSource.start(context.currentTime);
-          };
-
-          whenReady();
-        }, function(){
-          console.error("Cannot decode music file '"+name+"' ("+path+")");
-        });
-      };
-
-      request.send();
-      resolve();
-    });
-  };
 
   var loadSound = function(name, path) {
     return new Promise(function(resolve, reject) {
@@ -221,7 +206,6 @@ Quadnet.prepareResources = function() {
     loadTexture('particleTexture', 'texture/particle.png'),
     loadTexture('asteroidNormalMap', 'texture/asteroid_normal.jpg'),
     loadSound('explosion', 'sound/explosion.ogg'),
-    loadSound('shoot', 'sound/shoot.ogg'),
-    loadMusic('game', 'music/game.ogg')]);
+    loadSound('shoot', 'sound/shoot.ogg')]);
 
 };
