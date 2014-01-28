@@ -71,6 +71,7 @@ var quadnet = function(document, canvas_container) {
     var GameObject = function(object3d, x, y) {
       this.x = x;
       this.y = y;
+      this.collision_check = Math.random() * 100;
 
       this.destroy = function() {
         if (this.destroyed) return;
@@ -83,6 +84,7 @@ var quadnet = function(document, canvas_container) {
     GameObject.prototype = {
       x: 0,
       y: 0,
+      collision_check: 0,
       radius: 10,
       think: function(){},
       ondestroy: function(callback) {
@@ -91,6 +93,9 @@ var quadnet = function(document, canvas_container) {
       ondestroy_callback: function() {},
       collision: function(){},
       checkForCollision: function() {
+        if (this.collision_check < 100) return;
+        this.collision_check -= 100;
+
         var obj = this;
         if (obj.collision) {
           var objects = game_state.objects;
@@ -199,6 +204,8 @@ var quadnet = function(document, canvas_container) {
 
         object3d.position.x = this.x;
         object3d.position.y = this.y;
+
+        this.collision_check+=ticks;
         this.checkForCollision();
       }    
     };
@@ -292,6 +299,7 @@ var quadnet = function(document, canvas_container) {
         object3d.position.x = this.x;
         object3d.position.y = this.y;
 
+        this.collision_check+=ticks;
         this.checkForCollision();
       };
     };
