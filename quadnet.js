@@ -92,28 +92,22 @@ var quadnet = function(document, canvas_container) {
       },
       ondestroy_callback: function() {},
       collision: function(){},
-      checkForCollision: function() {
+      checkForCollision: function(condition) {
         if (this.collision_check < 100) return;
         this.collision_check -= 100;
 
         var obj = this;
-        if (obj.collision) {
-          var objects = game_state.objects;
-          for (var i=0; i<objects.length; i++) {
-            var obj2 = objects[i];
-            if (obj2.collisionable) {
-              if (obj2.x !== undefined && obj2 !== obj) {
-                if (
-                  (obj2.x - obj.x)*(obj2.x - obj.x) + 
-                  (obj2.y - obj.y)*(obj2.y - obj.y) <
-                  (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
-                  ) {
-                  obj.collision(obj2);
-                }
-              }
-            }
-          };
-        }
+        var objects = game_state.objects;
+        for (var i=0; i<objects.length; i++) {
+          var obj2 = objects[i];
+          if (condition(obj2) &&
+            (obj2.x - obj.x)*(obj2.x - obj.x) + 
+            (obj2.y - obj.y)*(obj2.y - obj.y) <
+            (obj2.radius + obj.radius) * (obj2.radius + obj.radius) 
+            ) {
+            obj.collision(obj2);
+          }
+        };
       }
     };
 
@@ -159,12 +153,10 @@ var quadnet = function(document, canvas_container) {
       this.y = 0;
       this.radius = 6;
       this.collision = function(obj) {
-        if (obj instanceof Asteroid) {
-          obj.destroy();
-          this.destroy();
-          game_state.lives--;
-          game_state.shouldInitRound = true;
-        }
+        obj.destroy();
+        this.destroy();
+        game_state.lives--;
+        game_state.shouldInitRound = true;
       };
 
       this.think = function(ticks) {
@@ -206,7 +198,9 @@ var quadnet = function(document, canvas_container) {
         object3d.position.y = this.y;
 
         this.collision_check+=ticks;
-        this.checkForCollision();
+        this.checkForCollision(function(obj) {
+          return obj instanceof Asteroid;
+        });
       }    
     };
     Ship.prototype = Object.create(GameObject.prototype);
@@ -272,10 +266,8 @@ var quadnet = function(document, canvas_container) {
       var rotanglez = Math.random()*0.06-0.03;
 
       this.collision = function(obj) {
-        if (obj instanceof Bullet) {
-          this.destroy();
-          obj.destroy();
-        }
+        this.destroy();
+        obj.destroy();
       }
 
       this.think = function(ticks) {
@@ -300,7 +292,9 @@ var quadnet = function(document, canvas_container) {
         object3d.position.y = this.y;
 
         this.collision_check+=ticks;
-        this.checkForCollision();
+        this.checkForCollision(function(obj) {
+          return obj instanceof Bullet;
+        });
       };
     };
     Asteroid.prototype = Object.create(GameObject.prototype);
