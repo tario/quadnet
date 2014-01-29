@@ -278,13 +278,20 @@ var quadnet = function(document, canvas_container) {
         object3d.rotateY(rotangley);
         object3d.rotateZ(rotanglez);
 
-        if (nextx < square.left || nextx > square.right ) dx = -dx;
-        if (nexty < square.bottom || nexty > square.top ) dy = -dy;
+        var rebound = {
+          left: (nextx < square.left && this.x >= square.left),
+          right: (nextx > square.right && this.x <= square.right),
+          bottom: (nexty < square.bottom && this.y >= square.bottom),
+          top: (nexty > square.top && this.y <= square.top)
+        };
 
-        if (nextx < square.left) nextx = nextx + (square.left - nextx) * 2;
-        if (nexty < square.bottom) nexty = nexty + (square.bottom - nexty) * 2;
-        if (nextx > square.right) nextx = nextx + (square.right - nextx) * 2;
-        if (nexty > square.top) nexty = nexty + (square.top - nexty) * 2;
+        if (rebound.left || rebound.right ) dx = -dx;
+        if (rebound.top || rebound.bottom ) dy = -dy;
+
+        if (rebound.left) nextx = nextx + (square.left - nextx) * 2;
+        if (rebound.bottom) nexty = nexty + (square.bottom - nexty) * 2;
+        if (rebound.right) nextx = nextx + (square.right - nextx) * 2;
+        if (rebound.top) nexty = nexty + (square.top - nexty) * 2;
 
         this.x = nextx;
         this.y = nexty;
@@ -450,7 +457,7 @@ var quadnet = function(document, canvas_container) {
             game_state.objects.push(ship_state);
           })();
 
-          for (var i=0; i<game_state.level; i++) this.spawnAsteroid();
+          for (var i=0; i<game_state.level; i++) this.spawnAsteroid(1500);
         },
 
         spawnShoot: function(x, y, dx, dy) {
@@ -477,8 +484,9 @@ var quadnet = function(document, canvas_container) {
           game_state.objects.push(obj);
         },
 
-        spawnAsteroid: function() {
+        spawnAsteroid: function(out_distance) {
 
+          out_distance = out_distance || 0;
           var object3d = createAsteroid();
 
           var x, y, dx, dy;
@@ -486,6 +494,7 @@ var quadnet = function(document, canvas_container) {
           y = Math.random() * (square.top - square.bottom) + square.bottom;
           dx = (Math.round(Math.random()) - 0.5)*0.2;
           dy = (Math.round(Math.random()) - 0.5)*0.2;
+
           // randomize border
           switch(Math.floor(Math.random()*4)) {
             case 0.0:
@@ -506,6 +515,8 @@ var quadnet = function(document, canvas_container) {
               break;
           }
 
+          x = x - dx * out_distance;
+          y = y - dy * out_distance;
 
           object3d.position.set(x, y, 1.1);
           scene.add(object3d);
