@@ -624,7 +624,9 @@ var quadnet = function(document, canvas_container) {
       game_state.initRound();
       var anim = function(elapsed) { 
         if (last_elapsed) {
-          think(elapsed - last_elapsed);
+          var ticks = elapsed - last_elapsed;
+          if (ticks > 25) ticks = 25; 
+          think(ticks);
         }
         last_elapsed = elapsed;
         renderer.render(scene,camera);
