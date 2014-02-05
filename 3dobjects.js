@@ -97,8 +97,10 @@ Quadnet.prepareResources = function() {
       var fragmentShaderCode = [
           "varying vec2 vUv;",
           "varying vec4 color_;",
+          "uniform float opacity;",
           "void main( void ) {",
-          "  gl_FragColor = color_;",
+          "  float alpha = (vUv[0] - 0.5) * (vUv[0] - 0.5) + (vUv[1] - 0.5) * (vUv[1] - 0.5) < 0.7 ? opacity : 0.0;",
+          "  gl_FragColor = vec4(color_[0], color_[1], color_[2], alpha);",
           "}"
         ].join("\n");
       var vertexShaderCode =   [
@@ -120,18 +122,23 @@ Quadnet.prepareResources = function() {
       };
 
       var uniforms = {
-        t: {type: 'f', value: 0.0}
+        t: {type: 'f', value: 0.0},
+        opacity: {type: 'f', value: 1.0}
       };
 
       var material = new THREE.ShaderMaterial({
           vertexShader: vertexShaderCode,
           fragmentShader: fragmentShaderCode,
           uniforms: uniforms,
-          attributes: attributes});
+          attributes: attributes,
+          transparent: true});
 
       var geometry = new THREE.Geometry();
 
-      var zero = new THREE.Vector2(0.0, 0.0);
+      var uv0 = new THREE.Vector2(1.0, 1.0);
+      var uv1 = new THREE.Vector2(1.0, -1.0);
+      var uv2 = new THREE.Vector2(-1.0, -1.0);
+      var uv3 = new THREE.Vector2(-1.0, 1.0);
 
       var index = 0;
       function addParticle(color, dx, dy) {
@@ -141,8 +148,8 @@ Quadnet.prepareResources = function() {
         geometry.vertices[index*4+3] = new THREE.Vector3(-2, 2, 0);
         geometry.faces.push(new THREE.Face3(index*4+3, index*4+2, index*4+1));
         geometry.faces.push(new THREE.Face3(index*4+1, index*4+0, index*4+3));
-        geometry.faceVertexUvs[ 0 ].push( [ zero, zero, zero] );
-        geometry.faceVertexUvs[ 0 ].push( [ zero, zero, zero] );
+        geometry.faceVertexUvs[ 0 ].push( [ uv3, uv2, uv1] );
+        geometry.faceVertexUvs[ 0 ].push( [ uv1, uv0, uv3] );
 
         attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
         attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));

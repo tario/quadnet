@@ -217,7 +217,13 @@ var quadnet = function(document, canvas_container) {
         elapsed+= ticks;
 
         uniforms.t.value = elapsed;
-        
+
+        if (elapsed < ttl*0.5) {
+          uniforms.opacity.value = 1.0;
+        } else {
+          uniforms.opacity.value = 2*(ttl-elapsed)/ttl;
+        }
+
         if (elapsed > ttl) {
           this.destroy();
         }
