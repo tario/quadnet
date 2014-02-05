@@ -205,6 +205,29 @@ var quadnet = function(document, canvas_container) {
     };
     Ship.prototype = Object.create(GameObject.prototype);
 
+    var Explosion = function(object3d, x, y, ttl) {
+      GameObject.call(this,object3d, x, y);
+
+      this.x = x;
+      this.y = y;
+      var elapsed = 0.0;
+
+      var uniforms = object3d.material.uniforms;
+      this.think = function(ticks) {
+        elapsed+= ticks;
+
+        uniforms.t.value = elapsed;
+        
+        if (elapsed > ttl) {
+          this.destroy();
+        }
+
+        object3d.position.x = this.x;
+        object3d.position.y = this.y;
+      };      
+    };
+    Explosion.prototype = Object.create(GameObject.prototype);
+
     var Particle = function(object3d, x, y, dx, dy, ttl) {
       GameObject.call(this,object3d, x, y);
 
@@ -338,6 +361,7 @@ var quadnet = function(document, canvas_container) {
       var createRedParticle = Quadnet.objects.createParticleFactory(0xFF0000);
       var createWhiteParticle = Quadnet.objects.createParticleFactory(0xFFFFFF);
       var createYellowParticle = Quadnet.objects.createParticleFactory(0xFFFF00);
+      var createExplosion = Quadnet.objects.createExplosionFactory();
 
       return {
         objects: [],
@@ -529,33 +553,25 @@ var quadnet = function(document, canvas_container) {
               var object3d = type();
               object3d.position.set(x, y, 1.1);
               scene.add(object3d);
-              obj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
-              obj.ondestroy(function() {
+              newobj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
+              newobj.ondestroy(function() {
                 game_state.removeObject(this);
               });
-              game_state.objects.push(obj);
+              game_state.objects.push(newobj);
             };
 
-            for (var i=0; i<12; i++)
+            for (var i=0; i<6; i++)
               spawnParticle(createWhiteParticle, obj.x, obj.y, (Math.random()-0.5)*0.4 ,(Math.random()-0.5)*0.4);
 
-            var cos_t = Math.cos(Math.PI/16);
-            var sin_t = Math.sin(Math.PI/16);
-            var dx = 1;
-            var dy = 0;
-            for (var i=0; i<32; i++) {
-              (function() {
-                var dx_ = dx;
-                var dy_ = dy;
-                dx = dx_ * cos_t - dy_ * sin_t;
-                dy = dx_ * sin_t + dy_ * cos_t;
-                spawnParticle(createRedParticle, obj.x, obj.y, dx*0.07 ,dy*0.07);
-                spawnParticle(createRedParticle, obj.x, obj.y, dx*0.085 ,dy*0.085);
-                spawnParticle(createRedParticle, obj.x, obj.y, dx*0.1 ,dy*0.1);
-                spawnParticle(createYellowParticle, obj.x, obj.y, dx*0.115 ,dy*0.115);
-                spawnParticle(createYellowParticle, obj.x, obj.y, dx*0.13 ,dy*0.13);
-              })();
-            }
+            var explosion3DObject = createExplosion();
+            var explosionObject = new Explosion(explosion3DObject, obj.x, obj.y, 400);
+
+            explosionObject.ondestroy(function() {
+              game_state.removeObject(this);
+            });
+            game_state.objects.push(explosionObject);
+            scene.add(explosion3DObject);
+
 
             Quadnet.sound.explosion(projection);
 

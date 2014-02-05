@@ -87,8 +87,100 @@ Quadnet.prepareResources = function() {
 
       return function() {
         var sprite = new THREE.Sprite(spriteMaterial);
-        sprite.scale.set( 6, 6, 1.0 );
+        sprite.scale.set( 12, 12, 1.0 );
         return sprite;
+      };
+  };
+
+  Quadnet.objects.createExplosionFactory = function() {
+
+      var fragmentShaderCode = [
+          "varying vec2 vUv;",
+          "varying vec4 color_;",
+          "void main( void ) {",
+          "  gl_FragColor = color_;",
+          "}"
+        ].join("\n");
+      var vertexShaderCode =   [
+        "varying vec2 vUv;",
+        "varying vec4 color_;",
+        "attribute vec3 displacement;",
+        "attribute vec4 xcolor;",
+        "uniform float t;",
+        "void main() {",
+        "vUv = uv;",
+        "color_ = xcolor;",
+        "vec4 mvPosition = modelViewMatrix * vec4( position + displacement * t, 1.0 );",
+        "gl_Position = projectionMatrix * mvPosition;",
+        "}"].join("\n");
+
+      attributes = {
+        displacement: { type: 'v3', value: []},
+        xcolor: {type: 'v4', value: []},
+      };
+
+      var uniforms = {
+        t: {type: 'f', value: 0.0}
+      };
+
+      var material = new THREE.ShaderMaterial({
+          vertexShader: vertexShaderCode,
+          fragmentShader: fragmentShaderCode,
+          uniforms: uniforms,
+          attributes: attributes});
+
+      var geometry = new THREE.Geometry();
+
+      var zero = new THREE.Vector2(0.0, 0.0);
+
+      var index = 0;
+      function addParticle(color, dx, dy) {
+        geometry.vertices[index*4] = new THREE.Vector3(2,2, 0); 
+        geometry.vertices[index*4+1] = new THREE.Vector3(2, -2, 0);
+        geometry.vertices[index*4+2] = new THREE.Vector3(-2, -2, 0);
+        geometry.vertices[index*4+3] = new THREE.Vector3(-2, 2, 0);
+        geometry.faces.push(new THREE.Face3(index*4+3, index*4+2, index*4+1));
+        geometry.faces.push(new THREE.Face3(index*4+1, index*4+0, index*4+3));
+        geometry.faceVertexUvs[ 0 ].push( [ zero, zero, zero] );
+        geometry.faceVertexUvs[ 0 ].push( [ zero, zero, zero] );
+
+        attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
+        attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
+        attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
+        attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
+
+        attributes.xcolor.value.push(color);
+        attributes.xcolor.value.push(color);
+        attributes.xcolor.value.push(color);
+        attributes.xcolor.value.push(color);
+        index++;
+      }
+
+      var cos_t = Math.cos(Math.PI/16);
+      var sin_t = Math.sin(Math.PI/16);
+      var dx = 1;
+      var dy = 0;
+      var red = new THREE.Vector4(1.0,0.0,0.0,1.0);
+      var yellow = new THREE.Vector4(1.0,1.0,0.0,1.0);
+      for (var i=0; i<32; i++) {
+        (function() {
+          var dx_ = dx;
+          var dy_ = dy;
+          dx = dx_ * cos_t - dy_ * sin_t;
+          dy = dx_ * sin_t + dy_ * cos_t;
+          addParticle(red, dx*0.07 ,dy*0.07);
+          addParticle(red, dx*0.085 ,dy*0.085);
+          addParticle(red, dx*0.1 ,dy*0.1);
+          addParticle(yellow, dx*0.115 ,dy*0.115);
+          addParticle(yellow, dx*0.13 ,dy*0.13);
+        })();
+      }
+
+      geometry.computeFaceNormals();
+
+      return function() {
+        var newMaterial = material.clone();
+        return new THREE.Mesh(geometry, newMaterial);
       };
   };
 
