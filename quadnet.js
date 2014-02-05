@@ -211,7 +211,6 @@ var quadnet = function(document, canvas_container) {
       this.x = x;
       this.y = y;
       var elapsed = 0.0;
-
       var uniforms = object3d.material.uniforms;
       this.think = function(ticks) {
         elapsed+= ticks;

@@ -99,7 +99,7 @@ Quadnet.prepareResources = function() {
           "varying vec4 color_;",
           "uniform float opacity;",
           "void main( void ) {",
-          "  float alpha = (vUv[0] - 0.5) * (vUv[0] - 0.5) + (vUv[1] - 0.5) * (vUv[1] - 0.5) < 0.7 ? opacity : 0.0;",
+          "  float alpha = (vUv[0] - 0.5) * (vUv[0] - 0.5) + (vUv[1] - 0.5) * (vUv[1] - 0.5) < 0.25 ? opacity : 0.0;",
           "  gl_FragColor = vec4(color_[0], color_[1], color_[2], alpha);",
           "}"
         ].join("\n");
@@ -136,12 +136,12 @@ Quadnet.prepareResources = function() {
       var geometry = new THREE.Geometry();
 
       var uv0 = new THREE.Vector2(1.0, 1.0);
-      var uv1 = new THREE.Vector2(1.0, -1.0);
-      var uv2 = new THREE.Vector2(-1.0, -1.0);
-      var uv3 = new THREE.Vector2(-1.0, 1.0);
+      var uv1 = new THREE.Vector2(1.0, 0.0);
+      var uv2 = new THREE.Vector2(0.0, 0.0);
+      var uv3 = new THREE.Vector2(0.0, 1.0);
 
       var index = 0;
-      var size = 0.01;
+      var size = 0.005;
       function addParticle(color, dx, dy) {
         geometry.vertices[index*4] = new THREE.Vector3(size,size, 0); 
         geometry.vertices[index*4+1] = new THREE.Vector3(size, -size, 0);
@@ -165,13 +165,13 @@ Quadnet.prepareResources = function() {
         index++;
       }
 
-      var cos_t = Math.cos(Math.PI/16);
-      var sin_t = Math.sin(Math.PI/16);
+      var cos_t = Math.cos(Math.PI/32);
+      var sin_t = Math.sin(Math.PI/32);
       var dx = 1;
       var dy = 0;
       var red = new THREE.Vector4(1.0,0.0,0.0,1.0);
       var yellow = new THREE.Vector4(1.0,1.0,0.0,1.0);
-      for (var i=0; i<32; i++) {
+      for (var i=0; i<64; i++) {
         (function() {
           var dx_ = dx;
           var dy_ = dy;
