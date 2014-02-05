@@ -570,7 +570,7 @@ var quadnet = function(document, canvas_container) {
               spawnParticle(createWhiteParticle, obj.x, obj.y, (Math.random()-0.5)*0.4 ,(Math.random()-0.5)*0.4);
 
             var explosion3DObject = createExplosion();
-            var explosionObject = new Explosion(explosion3DObject, obj.x, obj.y, 400);
+            var explosionObject = new Explosion(explosion3DObject, projection.x, projection.y, 400);
 
             explosionObject.ondestroy(function() {
               game_state.removeObject(this);

@@ -112,8 +112,8 @@ Quadnet.prepareResources = function() {
         "void main() {",
         "vUv = uv;",
         "color_ = xcolor;",
-        "vec4 mvPosition = modelViewMatrix * vec4( position + displacement * t, 1.0 );",
-        "gl_Position = projectionMatrix * mvPosition;",
+        "vec4 mPosition = modelMatrix * vec4( position + displacement * t, 1.0 );",
+        "gl_Position = mPosition;",
         "}"].join("\n");
 
       attributes = {
@@ -141,16 +141,18 @@ Quadnet.prepareResources = function() {
       var uv3 = new THREE.Vector2(-1.0, 1.0);
 
       var index = 0;
+      var size = 0.01;
       function addParticle(color, dx, dy) {
-        geometry.vertices[index*4] = new THREE.Vector3(2,2, 0); 
-        geometry.vertices[index*4+1] = new THREE.Vector3(2, -2, 0);
-        geometry.vertices[index*4+2] = new THREE.Vector3(-2, -2, 0);
-        geometry.vertices[index*4+3] = new THREE.Vector3(-2, 2, 0);
+        geometry.vertices[index*4] = new THREE.Vector3(size,size, 0); 
+        geometry.vertices[index*4+1] = new THREE.Vector3(size, -size, 0);
+        geometry.vertices[index*4+2] = new THREE.Vector3(-size, -size, 0);
+        geometry.vertices[index*4+3] = new THREE.Vector3(-size, size, 0);
         geometry.faces.push(new THREE.Face3(index*4+3, index*4+2, index*4+1));
         geometry.faces.push(new THREE.Face3(index*4+1, index*4+0, index*4+3));
         geometry.faceVertexUvs[ 0 ].push( [ uv3, uv2, uv1] );
         geometry.faceVertexUvs[ 0 ].push( [ uv1, uv0, uv3] );
 
+        dx = dx * 0.005; dy = dy * 0.009;
         attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
         attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
         attributes.displacement.value.push(new THREE.Vector3(dx,dy,0.0));
