@@ -14,16 +14,18 @@
 body {
   margin: 0 0 0 0;
 }
-.quadnet {
+#quadnet {
   width:100%;
   height:100%;
 }
 </style>
 <body>
-  <div class="quadnet"></div>
+  <div id="quadnet"></div>
   <script type="text/javascript">
     window.onload= function(){
-      Quadnet.init();
+      Quadnet.prepareResources().then(function(){
+        quadnet(document, document.getElementById("quadnet"));
+      });
     };
   </script>
 </body>

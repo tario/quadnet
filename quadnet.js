@@ -155,8 +155,12 @@ var quadnet = function(document, canvas_container) {
       this.collision = function(obj) {
         obj.destroy();
         this.destroy();
-        game_state.lives--;
-        game_state.shouldInitRound = true;
+        if (game_state.lives === 0) {
+          game_state.shouldEndGame = true;
+        } else {
+          game_state.lives--;
+          game_state.shouldInitRound = true;
+        }
       };
 
       this.think = function(ticks) {
@@ -373,7 +377,7 @@ var quadnet = function(document, canvas_container) {
         score: 0,
         level: 1,
         stock: 2,
-        score: 0,
+        lives: 2,
         bonus_score: 0,
         shouldInitRound: false,
         removeObject: function(obj) {
@@ -643,6 +647,14 @@ var quadnet = function(document, canvas_container) {
       var last_elapsed = null;
 
       game_state.initRound();
+
+      var removeQuadnet = function() {
+        Quadnet.music.stop();
+        while (canvas_container.firstChild) {
+          canvas_container.removeChild(canvas_container.firstChild);
+        }
+      };
+
       var anim = function(elapsed) { 
         if (last_elapsed) {
           var ticks = elapsed - last_elapsed;
@@ -651,7 +663,11 @@ var quadnet = function(document, canvas_container) {
         }
         last_elapsed = elapsed;
         renderer.render(scene,camera);
-        requestAnimationFrame(anim);
+        if (game_state.shouldEndGame) {
+          removeQuadnet();
+        } else {
+          requestAnimationFrame(anim);
+        }
       };
       requestAnimationFrame(anim);
     })();
