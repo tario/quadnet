@@ -7,3 +7,18 @@ Quadnet.init = function() {
     quadnet(document,obj);
   }
 }
+
+Quadnet.stop = function() {
+	this.onStopFcn();
+};
+
+Quadnet.onStop = function(fcn) {
+	if (this.onStopFcn) {
+		var oldFcn = this.onStopFcn;
+		var newFcn = fcn;
+		fcn = function(arguments) {
+			oldFcn(arguments); newFcn(arguments);
+		}
+	}
+	this.onStopFcn = fcn;
+};

@@ -16,20 +16,6 @@ var quadnet = function(document, canvas_container) {
 
     var renderer = newRenderer();
     renderer.setClearColor(new THREE.Color(0x000000));
-
-    var hud = document.createElement( 'div' );
-    canvas_container.appendChild(hud);
-    hud.innerHTML = "<style>" +
-      "@font-face {font-family: emulogic; src: url(emulogic.ttf);}" +
-      "#quadnet-hud {color: white; font-size: 100%; position: absolute; top: 0;left: 0; width: 100%; height: 100%}" +
-      "#quadnet-hud .display, .label {color: white; font-size: 150%; font-family: emulogic}" +
-      "#quadnet-hud table .label {width: 200px}" +
-      "#quadnet-hud table .content.score {width: 150px; text-align: right}" +
-      "</style>" +
-      "<table>" +
-       "<tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td>" +
-      "</table>";
-    hud.id = "quadnet-hud";
     canvas_container.appendChild(renderer.domElement);
 
     var width, height;
@@ -653,6 +639,7 @@ var quadnet = function(document, canvas_container) {
         while (canvas_container.firstChild) {
           canvas_container.removeChild(canvas_container.firstChild);
         }
+        Quadnet.stop({score: game_state.score});
       };
 
       var anim = function(elapsed) { 

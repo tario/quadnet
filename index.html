@@ -14,17 +14,115 @@
 body {
   margin: 0 0 0 0;
 }
-#quadnet {
+#quadnet, #canvas-container {
   width:100%;
   height:100%;
 }
+
+@font-face {font-family: emulogic; src: url(emulogic.ttf);}
+.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%;}
+
+#quadnet-hud {color: white; font-size: 100%;}
+#quadnet-hud .display, .label {color: white; font-size: 150%; font-family: emulogic}
+#quadnet-hud table .label {width: 200px}
+#quadnet-hud table .content.score {width: 150px; text-align: right}
+
+#quadnet-hud, #quadnet-welcome-screen {display: none;}
+#quadnet-welcome-screen {
+  background: url('img/background.jpg');
+  background-size:100% 100%;
+}
+
+#quadnet-loading-screen {
+  text-align: center;
+  color: white;
+  background: url('img/background.jpg');
+  background-size:100% 100%;
+}
+
+#quadnet-loading-screen h1 {
+  position: relative;
+  top: 50%;
+  font-family: emulogic;
+}
+
+
+#quadnet-loading-screen #container {
+    display: table;
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    }
+
+#quadnet-loading-screen #content {
+    display: table-cell;
+    vertical-align: middle;
+    position: relative;
+    }
+
+#quadnet-loading-screen #inner {
+    width: 50%;
+    margin: 0 auto;
+    padding: 0 20px;
+    }
+
 </style>
 <body>
-  <div id="quadnet"></div>
+  <div id="quadnet">
+    <div id="canvas-container">
+    </div>
+    <div id="quadnet-loading-screen" class="quadnet-screen">
+      <div id="container">
+        <div id="content">
+          <div id="inner">        
+            <h1>LOADING...</h1>
+          </div><!-- fin inner -->
+        </div><!-- fin content" -->
+      </div>
+    </div>
+
+    <div id="quadnet-welcome-screen" class="quadnet-screen">
+
+    </div>
+
+    <div id="quadnet-hud" class="quadnet-screen">
+      <table>
+        <tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td></tr>
+      </table>
+    </div>
+
+  </div>
   <script type="text/javascript">
     window.onload= function(){
+      Quadnet.onStop(function(arguments) {
+        activateScreen("#quadnet-welcome-screen");
+      });
+
+      var activateScreen = function(name) {
+        // hide all screens
+        var allScreens = document.querySelectorAll(".quadnet-screen");
+        for (var i=0; i<allScreens.length; i++) {
+          allScreens[i].style.display = "none";
+        }
+
+        document.querySelector(name).style.display = "inline";
+      };
+
       Quadnet.prepareResources().then(function(){
-        quadnet(document, document.getElementById("quadnet"));
+        var launch = function() {
+          activateScreen("#quadnet-hud");
+          quadnet(document, document.getElementById("canvas-container"));
+        };
+
+        // this timeout simulates a delay on loading screen
+        setTimeout(function() {
+          window.onkeydown = function(e){
+            if (e.keyCode === 13) {
+              launch();
+            };
+          };
+          activateScreen("#quadnet-welcome-screen");
+        },1000);
       });
     };
   </script>
