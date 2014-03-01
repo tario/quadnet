@@ -19,18 +19,16 @@ body {
   height:100%;
 }
 
-@font-face {font-family: emulogic; src: url(emulogic.ttf);}
-.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%;}
+.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: sans-serif; color: #fff;}
 
 #quadnet-hud {color: white; font-size: 100%;}
-#quadnet-hud .display, .label {color: white; font-size: 150%; font-family: emulogic}
+#quadnet-hud .display, .label {color: white; font-size: 200%}
 #quadnet-hud table .label {width: 200px}
 #quadnet-hud table .content.score {width: 150px; text-align: right}
 
 #quadnet-hud, #quadnet-welcome-screen {display: none;}
 #quadnet-welcome-screen {
-  background: url('img/background.jpg');
-  background-size:100% 100%;
+  background-color: black;
 }
 
 #quadnet-loading-screen {
@@ -43,7 +41,7 @@ body {
 #quadnet-loading-screen h1 {
   position: relative;
   top: 50%;
-  font-family: emulogic;
+  font-family: sans-serif;
 }
 
 
@@ -66,6 +64,76 @@ body {
     padding: 0 20px;
     }
 
+.centered-layer {
+  text-align: center;
+}
+
+h1.quadnet-title {
+  color: #080;
+  font-size: 1500%;
+  margin-top: 5%;
+  margin-bottom: 0;
+}
+
+h2.press-enter {
+  color: #fff;
+  font-size: 300%;
+  margin-top: 1%;
+}
+
+a {
+  color: #0c0;
+}
+
+#quadnet-welcome-screen .centered-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#quadnet-welcome-screen img.netimage {
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 16%;
+}
+
+div.footer {
+  height: auto;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+div.credits {
+  text-align: left;
+}
+
+.footer table {
+  color: #fff;
+  font-size:150%;
+  width: 100%;
+}
+
+table td.left-side {
+  width: 50%;
+}
+
+table td.middle-side {
+  text-align: right;
+  width: 10%;
+}
+
+table td.right-side {
+  text-align: right;
+  width: 10%;
+}
+
+table td.right-side img {
+  width: 45%;
+}
+
 </style>
 <body>
   <div id="quadnet">
@@ -81,19 +149,52 @@ body {
       </div>
     </div>
 
-    <div id="quadnet-welcome-screen" class="quadnet-screen">
-
-    </div>
-
     <div id="quadnet-hud" class="quadnet-screen">
       <table>
         <tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td></tr>
       </table>
     </div>
 
+    <div id="quadnet-welcome-screen" class="quadnet-screen">
+      <div class="centered-layer">
+        <img class="netimage" src="img/welcomenet.jpg"> </img>
+      </div>
+      <div class="centered-layer">
+        <h1 class="quadnet-title">QUADNET</h1>
+        <h2 class="press-enter"><a href="#">Press Enter to Play</a></h1>
+
+        <div class="footer">
+          <table>
+            <thead>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="left-side">
+                  <div class="credits">Dario Seminara <br/>
+                    <a href="http://github.com/tario/quadnet">http://github.com/tario/quadnet</a><br/>
+                    Tribute to 1998's QUADNET <br/>
+                    <a href="http://www.martinmagnusson.com/games/quadnet">http://www.martinmagnusson.com/games/quadnet</a>
+                  </div>
+                </td>
+                <td class="middle-side">
+                  Share this game with your friends!
+                </td>
+                <td class="right-side">
+                  <img src="img/twitter-button.png"></img>
+                  <img src="img/facebook-button.png"></img>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    
+    </div>
+
   </div>
   <script type="text/javascript">
     window.onload= function(){
+
       Quadnet.onStop(function(arguments) {
         activateScreen("#quadnet-welcome-screen");
       });
@@ -116,6 +217,7 @@ body {
 
         // this timeout simulates a delay on loading screen
         setTimeout(function() {
+          document.querySelector(".press-enter a").onclick = launch;
           window.onkeydown = function(e){
             if (e.keyCode === 13) {
               launch();
