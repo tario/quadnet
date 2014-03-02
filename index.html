@@ -194,8 +194,10 @@ table td.right-side img {
   </div>
   <script type="text/javascript">
     window.onload= function(){
+      var onGame = false;
 
       Quadnet.onStop(function(arguments) {
+        onGame = false;
         activateScreen("#quadnet-welcome-screen");
       });
 
@@ -213,6 +215,7 @@ table td.right-side img {
         var launch = function() {
           activateScreen("#quadnet-hud");
           quadnet(document, document.getElementById("canvas-container"));
+          onGame = true;
         };
 
         // this timeout simulates a delay on loading screen
@@ -220,7 +223,7 @@ table td.right-side img {
           document.querySelector(".press-enter a").onclick = launch;
           window.onkeydown = function(e){
             if (e.keyCode === 13) {
-              launch();
+              if (!onGame) launch();
             };
           };
           activateScreen("#quadnet-welcome-screen");
