@@ -550,7 +550,7 @@ var quadnet = function(document, canvas_container) {
               var object3d = type();
               object3d.position.set(x, y, 1.1);
               scene.add(object3d);
-              newobj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
+              var newobj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
               newobj.ondestroy(function() {
                 game_state.removeObject(this);
               });
@@ -644,6 +644,7 @@ var quadnet = function(document, canvas_container) {
         Quadnet.stop({score: game_state.score});
       };
 
+      var myReq;
       var anim = function(elapsed) { 
         if (last_elapsed) {
           var ticks = elapsed - last_elapsed;
@@ -654,11 +655,12 @@ var quadnet = function(document, canvas_container) {
         renderer.render(scene,camera);
         if (game_state.shouldEndGame) {
           removeQuadnet();
+          cancelAnimationFrame(myReq);
         } else {
-          requestAnimationFrame(anim);
+          myReq = requestAnimationFrame(anim);
         }
       };
-      requestAnimationFrame(anim);
+      myReq = requestAnimationFrame(anim);
     })();
   };
 
