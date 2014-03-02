@@ -26,10 +26,12 @@ Quadnet.music = Quadnet.music || (function() {
       return ret;
     })();
 
+(function() {
+  var context = new (window.AudioContext || window.webkitAudioContext)();
+
 Quadnet.prepareResources = function() { 
   var textures = {};
 
-  var context = new (window.AudioContext || window.webkitAudioContext)();
 
   var loadSound = function(name, path) {
     return new Promise(function(resolve, reject) {
@@ -310,3 +312,5 @@ Quadnet.prepareResources = function() {
     loadSound('shoot', 'sound/shoot.ogg')]);
 
 };
+
+})();

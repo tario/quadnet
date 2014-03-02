@@ -660,5 +660,5 @@ var quadnet = function(document, canvas_container) {
     })();
   };
 
-  main();
+  Quadnet.prepareResources().then(main);
 };
