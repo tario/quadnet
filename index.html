@@ -183,7 +183,7 @@ table td.right-side img {
   <div id="quadnet">
     <div id="canvas-container">
     </div>
-    <div id="quadnet-loading-screen" class="quadnet-screen">
+    <div id="quadnet-loading-screen" class="quadnet-screen active">
       <div id="container">
         <div id="content">
           <div id="inner">        
@@ -196,41 +196,6 @@ table td.right-side img {
     <div id="quadnet-hud" class="quadnet-screen">
       <table>
         <tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td></tr>
-      </table>
-    </div>
-
-    <div id="quadnet-instructions-screen" class="quadnet-screen toup">
-      <table>
-        <tr>
-          <td class="img-td">
-            <img src="img/instr1.jpg"></img>
-          </td>
-          <td class="text-td">
-            <p>Use arrow keys to move the ship in all four directions</p>
-          </td>
-          <td class="img-td">
-            <img src="img/instr2.gif"></img>
-          </td>
-          <td class="text-td">
-            <p>Use WASD to shoot in all four directions</p>
-          </td>
-        </tr>
-      </table>
-      <table>
-        <tr>
-          <td class="text-td">
-            <p>Evade asteroids to avoid colliding with them</p>
-          </td>
-          <td class="img-td">
-            <img src="img/instr3.jpg"></img>
-          </td>
-          <td class="text-td">
-            <p>Shoot to destroy asteroids and earn points</p>
-          </td>
-          <td class="img-td">
-            <img src="img/instr4.jpg"></img>
-          </td>
-        </tr>
       </table>
     </div>
 
@@ -270,6 +235,42 @@ table td.right-side img {
     
     </div>
 
+
+    <div id="quadnet-instructions-screen" class="quadnet-screen toup">
+      <table>
+        <tr>
+          <td class="img-td">
+            <img src="img/instr1.jpg"></img>
+          </td>
+          <td class="text-td">
+            <p>Use arrow keys to move the ship in all four directions</p>
+          </td>
+          <td class="img-td">
+            <img src="img/instr2.gif"></img>
+          </td>
+          <td class="text-td">
+            <p>Use WASD to shoot in all four directions</p>
+          </td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <td class="text-td">
+            <p>Evade asteroids to avoid colliding with them</p>
+          </td>
+          <td class="img-td">
+            <img src="img/instr3.jpg"></img>
+          </td>
+          <td class="text-td">
+            <p>Shoot to destroy asteroids and earn points</p>
+          </td>
+          <td class="img-td">
+            <img src="img/instr4.jpg"></img>
+          </td>
+        </tr>
+      </table>
+    </div>
+
   </div>
   <script type="text/javascript">
     window.onload= function(){
@@ -287,14 +288,13 @@ table td.right-side img {
       });
 
       var activateScreen = function(name) {
-        // hide all screens
-
-        var allScreens = document.querySelectorAll(".quadnet-screen");
-        for (var i=0; i<allScreens.length; i++) {
-          allScreens[i].style.display = "none";
-        }
+        var currentScreen = document.querySelector(".quadnet-screen.active");
+        currentScreen.classList.remove("active");
+        setTimeout(function(){currentScreen.style.display = 'none'}, 500);
 
         document.querySelector(name).style.display = "inline";
+        document.querySelector(name).classList.add("active");
+
         window.onkeydown = function(){};
         (document.querySelector(name).ondisplay || (function(){}) )();
       };
