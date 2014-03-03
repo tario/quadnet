@@ -143,9 +143,26 @@ table td.right-side img {
   width: 45%;
 }
 
+#quadnet-instructions-screen table.top p {
+  font-size: 400%;
+  margin-left: 5%;
+  color: #0e0;
+}
+
 #quadnet-instructions-screen table {
   width: 100%;
-  height: 50%;
+}
+
+#quadnet-instructions-screen table.top {
+  height: 10%;
+}
+
+#quadnet-instructions-screen table.middle {
+  height: 45%;
+}
+
+#quadnet-instructions-screen table.bottom {
+  height: 45%;
 }
 
 #quadnet-instructions-screen table tr {
@@ -164,7 +181,11 @@ table td.right-side img {
 }
 
 #quadnet-instructions-screen table img {
-  width: 80%;
+  height: 100%;
+}
+
+#quadnet-instructions-screen table tr td.img-td div {
+  height: 240px;
 }
 
 .quadnet-screen {
@@ -238,35 +259,40 @@ table td.right-side img {
 
 
     <div id="quadnet-instructions-screen" class="quadnet-screen toup">
-      <table>
+      <table class="top">
+        <tr>
+          <td><p>INSTRUCTIONS</p></td>
+        </tr>
+      </table>
+      <table class="middle">
         <tr>
           <td class="img-td">
-            <img src="img/instr1.jpg"></img>
+            <div><img src="img/instr1.jpg"></img></div>
           </td>
           <td class="text-td">
             <p>Use arrow keys to move the ship in all four directions</p>
           </td>
           <td class="img-td">
-            <img src="img/instr2.gif"></img>
+            <div><img src="img/instr2.gif"></img></div>
           </td>
           <td class="text-td">
             <p>Use WASD to shoot in all four directions</p>
           </td>
         </tr>
       </table>
-      <table>
+      <table class="bottom">
         <tr>
           <td class="text-td">
             <p>Evade asteroids to avoid colliding with them</p>
           </td>
           <td class="img-td">
-            <img src="img/instr3.jpg"></img>
+            <div><img src="img/instr3.jpg"></img></div>
           </td>
           <td class="text-td">
             <p>Shoot to destroy asteroids and earn points</p>
           </td>
           <td class="img-td">
-            <img src="img/instr4.jpg"></img>
+            <div><img src="img/instr4.jpg"></img></div>
           </td>
         </tr>
       </table>
