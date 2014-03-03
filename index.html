@@ -324,14 +324,10 @@ table td.right-side img {
       };
 
       Quadnet.prepareResources().then(function(){
-
-        // this timeout simulates a delay on loading screen
-        setTimeout(function() {
-          document.querySelector(".press-enter a").onclick = function() {
-            activateScreen("#quadnet-welcome-screen");
-          };
-          activateScreen("#quadnet-welcome-screen");
-        },1000);
+        document.querySelector(".press-enter a").onclick = function() {
+          activateScreen("#quadnet-instructions-screen");
+        };
+        activateScreen("#quadnet-welcome-screen");
       });
     };
   </script>
