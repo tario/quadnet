@@ -21,14 +21,20 @@ body {
   background-color: black;
 }
 
-.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: sans-serif; color: #ee9a12;}
+.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: sans-serif;}
 
-#quadnet-hud {font-size: 100%;}
+#quadnet-hud {color: #0e0; font-size: 100%;}
 #quadnet-hud .display, .label {font-size: 200%}
 #quadnet-hud table .label {width: 200px}
 #quadnet-hud table .content.score {width: 150px; text-align: right}
 
 #quadnet-hud, #quadnet-welcome-screen, #quadnet-instructions-screen {display: none;}
+
+
+#quadnet-welcome-screen, #quadnet-instructions-screen  {
+  background-color: black;
+  color: #ee9a12;
+}
 
 table {
   color: inherit;
@@ -282,7 +288,7 @@ table td.right-side img {
 
       var activateScreen = function(name) {
         // hide all screens
-        
+
         var allScreens = document.querySelectorAll(".quadnet-screen");
         for (var i=0; i<allScreens.length; i++) {
           allScreens[i].style.display = "none";
