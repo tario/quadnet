@@ -21,7 +21,8 @@ body {
   background-color: black;
 }
 
-.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: sans-serif;}
+@font-face {font-family: imagine; src: url(font/imagine_font.ttf);}
+.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: imagine;}
 
 #quadnet-hud {color: #0e0; font-size: 100%;}
 #quadnet-hud .display, .label {font-size: 200%}
@@ -38,10 +39,7 @@ body {
 
 table {
   color: inherit;
-}
-
-p {
-  font-family: sans-serif;
+  font-family: inherit;
 }
 
 #quadnet-loading-screen {
@@ -54,7 +52,7 @@ p {
 #quadnet-loading-screen h1 {
   position: relative;
   top: 50%;
-  font-family: sans-serif;
+  font-family: inherit;
 }
 
 
@@ -83,14 +81,13 @@ p {
 
 h1.quadnet-title {
   color: #080;
-  font-size: 1500%;
-  margin-top: 5%;
+  font-size: 1000%;
   margin-bottom: 0;
 }
 
 h2.press-enter {
   color: #fff;
-  font-size: 300%;
+  font-size: 200%;
   margin-top: 1%;
 }
 
@@ -109,7 +106,7 @@ a {
 #quadnet-welcome-screen img.netimage {
   margin-left: auto;
   margin-right: auto;
-  margin-top: 16%;
+  margin-top: 12%;
 }
 
 div.footer {
@@ -176,6 +173,10 @@ table td.right-side img {
 
 .quadnet-screen.toup {
   top: -100%;
+}
+
+.footer table {
+  line-height: 130%;
 }
 
 </style>
