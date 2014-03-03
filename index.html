@@ -13,22 +13,29 @@
 <style>
 body {
   margin: 0 0 0 0;
+  overflow: hidden;
 }
 #quadnet, #canvas-container {
   width:100%;
   height:100%;
+  background-color: black;
 }
 
-.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: sans-serif; color: #fff;}
+.quadnet-screen {position: absolute;top: 0; left: 0; width: 100%; height: 100%; font-family: sans-serif; color: #ee9a12;}
 
-#quadnet-hud {color: white; font-size: 100%;}
-#quadnet-hud .display, .label {color: white; font-size: 200%}
+#quadnet-hud {font-size: 100%;}
+#quadnet-hud .display, .label {font-size: 200%}
 #quadnet-hud table .label {width: 200px}
 #quadnet-hud table .content.score {width: 150px; text-align: right}
 
-#quadnet-hud, #quadnet-welcome-screen {display: none;}
-#quadnet-welcome-screen {
-  background-color: black;
+#quadnet-hud, #quadnet-welcome-screen, #quadnet-instructions-screen {display: none;}
+
+table {
+  color: inherit;
+}
+
+p {
+  font-family: sans-serif;
 }
 
 #quadnet-loading-screen {
@@ -111,7 +118,6 @@ div.credits {
 }
 
 .footer table {
-  color: #fff;
   font-size:150%;
   width: 100%;
 }
@@ -132,6 +138,38 @@ table td.right-side {
 
 table td.right-side img {
   width: 45%;
+}
+
+#quadnet-instructions-screen table {
+  width: 100%;
+  height: 50%;
+}
+
+#quadnet-instructions-screen table tr {
+  width: 100%;
+  height: 100%;
+}
+
+#quadnet-instructions-screen table tr td.img-td {
+  width: 30%;
+  text-align: center;
+}
+
+#quadnet-instructions-screen table tr td.text-td {
+  width: 20%;
+  font-size: 300%;
+}
+
+#quadnet-instructions-screen table img {
+  width: 80%;
+}
+
+.quadnet-screen {
+  transition: all 0.5s ease-in-out;
+}
+
+.quadnet-screen.toup {
+  top: -100%;
 }
 
 </style>
@@ -155,7 +193,42 @@ table td.right-side img {
       </table>
     </div>
 
-    <div id="quadnet-welcome-screen" class="quadnet-screen">
+    <div id="quadnet-instructions-screen" class="quadnet-screen toup">
+      <table>
+        <tr>
+          <td class="img-td">
+            <img src="img/instr1.jpg"></img>
+          </td>
+          <td class="text-td">
+            <p>Use arrow keys to move the ship in all four directions</p>
+          </td>
+          <td class="img-td">
+            <img src="img/instr2.gif"></img>
+          </td>
+          <td class="text-td">
+            <p>Use WASD to shoot in all four directions</p>
+          </td>
+        </tr>
+      </table>
+      <table>
+        <tr>
+          <td class="text-td">
+            <p>Evade asteroids to avoid colliding with them</p>
+          </td>
+          <td class="img-td">
+            <img src="img/instr3.jpg"></img>
+          </td>
+          <td class="text-td">
+            <p>Shoot to destroy asteroids and earn points</p>
+          </td>
+          <td class="img-td">
+            <img src="img/instr4.jpg"></img>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="quadnet-welcome-screen" class="quadnet-screen toup">
       <div class="centered-layer">
         <img class="netimage" src="img/welcomenet.jpg"> </img>
       </div>
@@ -196,6 +269,12 @@ table td.right-side img {
     window.onload= function(){
       var onGame = false;
 
+      var launch = function() {
+        activateScreen("#quadnet-hud");
+        quadnet(document, document.getElementById("canvas-container"));
+        onGame = true;
+      };
+
       Quadnet.onStop(function(arguments) {
         onGame = false;
         activateScreen("#quadnet-welcome-screen");
@@ -203,28 +282,46 @@ table td.right-side img {
 
       var activateScreen = function(name) {
         // hide all screens
+        
         var allScreens = document.querySelectorAll(".quadnet-screen");
         for (var i=0; i<allScreens.length; i++) {
           allScreens[i].style.display = "none";
         }
 
         document.querySelector(name).style.display = "inline";
+        window.onkeydown = function(){};
+        (document.querySelector(name).ondisplay || (function(){}) )();
+      };
+
+      document.querySelector("#quadnet-welcome-screen").ondisplay = function() {
+        setTimeout(function() {
+          document.querySelector("#quadnet-welcome-screen").classList.remove("toup");
+        }, 0);
+        window.onkeydown = function(e){
+          if (e.keyCode === 13) {
+            document.querySelector("#quadnet-instructions-screen").classList.add("toup");
+            activateScreen("#quadnet-instructions-screen");
+          };
+        };
+      };
+
+      document.querySelector("#quadnet-instructions-screen").ondisplay = function() {
+        setTimeout(function() {
+          document.querySelector("#quadnet-instructions-screen").classList.remove("toup");
+        }, 0);
+        window.onkeydown = function(e){
+          onGame = true;
+          document.querySelector("#quadnet-instructions-screen").classList.add("toup");
+          launch();
+        };
       };
 
       Quadnet.prepareResources().then(function(){
-        var launch = function() {
-          activateScreen("#quadnet-hud");
-          quadnet(document, document.getElementById("canvas-container"));
-          onGame = true;
-        };
 
         // this timeout simulates a delay on loading screen
         setTimeout(function() {
-          document.querySelector(".press-enter a").onclick = launch;
-          window.onkeydown = function(e){
-            if (e.keyCode === 13) {
-              if (!onGame) launch();
-            };
+          document.querySelector(".press-enter a").onclick = function() {
+            activateScreen("#quadnet-welcome-screen");
           };
           activateScreen("#quadnet-welcome-screen");
         },1000);
