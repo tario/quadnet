@@ -63,6 +63,7 @@ table {
   width: 100%;
   font-size:150%;
   font-family: telegrama;
+  white-space: pre;
   background-color: black;
   border: 4px solid green;
 }
@@ -433,14 +434,20 @@ table td.right-side img {
         var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
         var html = "";
 
-        tbody.innerHTML = (lastScoreHighscore ? Quadnet.highscore.getAllForInput(lastScore) : Quadnet.highscore.getAll()).
+        var highscores = (lastScoreHighscore ? Quadnet.highscore.getAllForInput(lastScore) : Quadnet.highscore.getAll());
+        tbody.innerHTML = highscores.
         map(function(obj){
           if (obj.shouldInputName) {
             return "<tr><td class='name'><form><input type='text'></form></input></td><td class='score'>"+obj.score+"</td></tr>";
           } else {
-            return "<tr><td class='name'>"+obj.name+"</td><td class='score'>"+obj.score+"</td></tr>";
+            return "<tr><td class='name'></td><td class='score'>"+obj.score+"</td></tr>";
           }
         }).join("");
+
+        var queryAll = document.querySelectorAll("#quadnet-highscore-screen div table tbody tr td.name"); 
+        for (var i=0; i<10; i++) {
+          if (!highscores[i].shouldInputName) queryAll[i].innerText = highscores[i].name;
+        }
 
         if (lastScoreHighscore) {
           document.querySelector("table.highscores input").focus();
