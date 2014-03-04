@@ -301,7 +301,8 @@ table td.right-side img {
       </div>
       <div class="centered-layer">
         <h1 class="quadnet-title">QUADNET</h1>
-        <h2 class="press-enter"><a href="#">Press Enter to Play</a></h1>
+        <h2 class="press-enter"><a href="#">Press Enter to Play</a></h2>
+        <h2 class="see-highscores"><a href="#">See Highscores</a></h2>
 
         <div class="footer">
           <table>
@@ -463,14 +464,23 @@ table td.right-side img {
 
         setTimeout(function() {
           document.querySelector("#quadnet-highscore-screen").classList.remove("toup");
-        }, 0);
         
         if (!lastScoreHighscore) {
           window.onkeydown = function(e){
             document.querySelector("#quadnet-highscore-screen").classList.add("toup");
             activateScreen("#quadnet-welcome-screen");
           };
+
+          var fcn = function() {
+            window.onkeydown();
+            document.body.removeEventListener('click', fcn, false);
+          };
+          document.body.addEventListener('click', fcn, false);
+
         }
+
+        }, 0);
+
       };
 
       document.querySelector("#quadnet-welcome-screen").ondisplay = function() {
@@ -488,17 +498,29 @@ table td.right-side img {
       document.querySelector("#quadnet-instructions-screen").ondisplay = function() {
         setTimeout(function() {
           document.querySelector("#quadnet-instructions-screen").classList.remove("toup");
+          window.onkeydown = function(e){
+            onGame = true;
+            document.querySelector("#quadnet-instructions-screen").classList.add("toup");
+            launch();
+          };
+
+          var fcn = function() {
+            window.onkeydown();
+            document.body.removeEventListener('click', fcn, false);
+          };
+          document.body.addEventListener('click', fcn, false);
+
         }, 0);
-        window.onkeydown = function(e){
-          onGame = true;
-          document.querySelector("#quadnet-instructions-screen").classList.add("toup");
-          launch();
-        };
+
       };
 
       Quadnet.prepareResources().then(function(){
         document.querySelector(".press-enter a").onclick = function() {
           activateScreen("#quadnet-instructions-screen");
+        };
+        document.querySelector(".see-highscores a").onclick = function() {
+          lastScoreHighscore = false;
+          activateScreen("#quadnet-highscore-screen");
         };
         activateScreen("#quadnet-welcome-screen");
       });
