@@ -14,11 +14,12 @@ Quadnet.music = Quadnet.music || (function() {
       };
 
       var ret = {stop: function(){}, pause: function(){}};
-      var music = ["game"]; 
+      var music = ["game", "highscore", "highscore2"]; 
       music.forEach(function(entry) {
-        audioElement = new Audio("music/" + entry + ".ogg");
+        var audioElement = new Audio("music/" + entry + ".ogg");
         audioElement.loop = true;
         ret[entry] = function() {
+          Quadnet.music.stop();
           setCurrent(audioElement);
           ret.play();
         };

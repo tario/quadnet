@@ -424,6 +424,7 @@ table td.right-side img {
       document.querySelector("#quadnet-highscore-screen").ondisplay = function() {
         var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
         var html = "";
+
         tbody.innerHTML = (lastScoreHighscore ? Quadnet.highscore.getAllForInput(lastScore) : Quadnet.highscore.getAll()).
         map(function(obj){
           if (obj.shouldInputName) {
@@ -439,9 +440,16 @@ table td.right-side img {
             Quadnet.highscore.insert(document.querySelector("table.highscores form input").value, lastScore);
             document.querySelector("#quadnet-highscore-screen").classList.add("toup");
             activateScreen("#quadnet-welcome-screen");
+            return false;
           };
 
           document.querySelector("p.highscore-reached").style.display = "inline";
+
+          if (Quadnet.highscore.getAllForInput(lastScore)[0].shouldInputName) {
+            Quadnet.music.highscore2({loop: true});
+          } else {
+            Quadnet.music.highscore({loop: true});
+          }
         } else {
           document.querySelector("p.highscore-reached").style.display = "none";
         }
