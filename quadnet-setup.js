@@ -8,8 +8,8 @@ Quadnet.init = function() {
   }
 }
 
-Quadnet.stop = function() {
-	this.onStopFcn();
+Quadnet.stop = function(arguments) {
+	this.onStopFcn(arguments);
 };
 
 Quadnet.onStop = function(fcn) {

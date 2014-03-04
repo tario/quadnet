@@ -350,6 +350,7 @@ var quadnet = function(document, canvas_container) {
     var explosionLightStock = LightStock(8, 0xFFFFFF, 250);
     var shootLightStock = LightStock(16, 0xFFFFFF, 100);
 
+    document.querySelector("#quadnet-hud .score-display").innerText = "0";
     var game_state = (function(){
       var createBullet = Quadnet.objects.createBulletFactory();
       var createAsteroid = Quadnet.objects.createAsteroidFactory();
@@ -641,7 +642,7 @@ var quadnet = function(document, canvas_container) {
         while (canvas_container.firstChild) {
           canvas_container.removeChild(canvas_container.firstChild);
         }
-        Quadnet.stop({score: game_state.score});
+        Quadnet.stop({score: Math.round(game_state.score)});
       };
 
       var myReq;

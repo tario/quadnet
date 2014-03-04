@@ -6,6 +6,7 @@
   <script src="promise-3.2.0.js"></script>
   <script src="three.min.js" type="text/javascript"></script>
   <script src="quadnet.js" type="text/javascript"></script>
+  <script src="highscore.js" type="text/javascript"></script>
   <script src="quadnet-setup.js" type="text/javascript"></script>
   <script src="3dobjects.js" type="text/javascript"></script>
 </head>
@@ -37,9 +38,75 @@ body {
   color: #ee9a12;
 }
 
+.overlay {
+  top: 0px;
+  left: 0px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
 table {
   color: inherit;
   font-family: inherit;
+}
+
+#quadnet-highscore-screen {
+  text-align: center;
+  color: white;
+  background: url('img/background.jpg');
+  background-size:100% 100%;  
+}
+
+#quadnet-highscore-screen table.highscores {
+  width: 100%;
+  font-size:200%;
+  background-color: black;
+  border: 4px solid green;
+}
+
+#quadnet-highscore-screen table.highscores td {
+  border-bottom: 1px solid green;
+}
+#quadnet-highscore-screen table.highscores th {
+  border-bottom: 3px solid green;
+}
+
+#quadnet-highscore-screen table.highscores td.score {
+  text-align: right;
+}
+
+#quadnet-highscore-screen table.highscores td.name {
+  text-align: left;
+}
+
+#quadnet-highscore-screen form {
+  margin: 0;
+}
+
+#quadnet-highscore-screen input {
+  background-color: black;
+  font-family: imagine;
+  color: white;
+  border: none;
+  font-size: 100%;
+  width: 100%;
+  height: 100%;
+}
+
+#quadnet-highscore-screen p.title {
+  font-size: 400%;
+  text-align: center;
+  width: 100%;
+  color: #0e0;
+  margin-bottom: 0;
+}
+
+#quadnet-highscore-screen p.highscore-reached {
+  font-size: 200%;
+  text-align: center;
+  width: 100%;
+  color: white;
 }
 
 #quadnet-loading-screen {
@@ -56,20 +123,20 @@ table {
 }
 
 
-#quadnet-loading-screen #container {
+#container {
     display: table;
     height: 100%;
     width: 100%;
     margin: 0;
     }
 
-#quadnet-loading-screen #content {
+#content {
     display: table-cell;
     vertical-align: middle;
     position: relative;
     }
 
-#quadnet-loading-screen #inner {
+#inner {
     width: 50%;
     margin: 0 auto;
     padding: 0 20px;
@@ -298,10 +365,32 @@ table td.right-side img {
       </table>
     </div>
 
+    <div id="quadnet-highscore-screen" class="quadnet-screen toup">
+      <p class="title">HIGHSCORES</p>
+      <p class="highscore-reached">Congratulations! your score reach highscore table!</p>
+
+      <div id="container" class="overlay">
+        <div id="content">
+          <div id="inner">  
+            <table class="highscores">
+              <thead>
+                <th class="name-column">Name</th>
+                <th class="score-column">Score</th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
   <script type="text/javascript">
     window.onload= function(){
       var onGame = false;
+      var lastScore;
+      var lastScoreHighscore;
 
       var launch = function() {
         activateScreen("#quadnet-hud");
@@ -311,7 +400,13 @@ table td.right-side img {
 
       Quadnet.onStop(function(arguments) {
         onGame = false;
-        activateScreen("#quadnet-welcome-screen");
+        lastScore = arguments.score;
+        if (Quadnet.highscore.shouldEnterHighscore(arguments.score)) {
+          lastScoreHighscore = true;
+          activateScreen("#quadnet-highscore-screen");
+        } else {
+          activateScreen("#quadnet-welcome-screen");
+        }
       });
 
       var activateScreen = function(name) {
@@ -326,13 +421,50 @@ table td.right-side img {
         (document.querySelector(name).ondisplay || (function(){}) )();
       };
 
+      document.querySelector("#quadnet-highscore-screen").ondisplay = function() {
+        var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
+        var html = "";
+        tbody.innerHTML = (lastScoreHighscore ? Quadnet.highscore.getAllForInput(lastScore) : Quadnet.highscore.getAll()).
+        map(function(obj){
+          if (obj.shouldInputName) {
+            return "<tr><td class='name'><form><input type='text'></form></input></td><td class='score'>"+obj.score+"</td></tr>";
+          } else {
+            return "<tr><td class='name'>"+obj.name+"</td><td class='score'>"+obj.score+"</td></tr>";
+          }
+        }).join("");
+
+        if (lastScoreHighscore) {
+          document.querySelector("table.highscores input").focus();
+          document.querySelector("table.highscores form").onsubmit = function() {
+            Quadnet.highscore.insert(document.querySelector("table.highscores form input").value, lastScore);
+            document.querySelector("#quadnet-highscore-screen").classList.add("toup");
+            activateScreen("#quadnet-welcome-screen");
+          };
+
+          document.querySelector("p.highscore-reached").style.display = "inline";
+        } else {
+          document.querySelector("p.highscore-reached").style.display = "none";
+        }
+
+        setTimeout(function() {
+          document.querySelector("#quadnet-highscore-screen").classList.remove("toup");
+        }, 0);
+        
+        if (!lastScoreHighscore) {
+          window.onkeydown = function(e){
+            document.querySelector("#quadnet-highscore-screen").classList.add("toup");
+            activateScreen("#quadnet-welcome-screen");
+          };
+        }
+      };
+
       document.querySelector("#quadnet-welcome-screen").ondisplay = function() {
         setTimeout(function() {
           document.querySelector("#quadnet-welcome-screen").classList.remove("toup");
         }, 0);
         window.onkeydown = function(e){
           if (e.keyCode === 13) {
-            document.querySelector("#quadnet-instructions-screen").classList.add("toup");
+            document.querySelector("#quadnet-welcome-screen").classList.add("toup");
             activateScreen("#quadnet-instructions-screen");
           };
         };
