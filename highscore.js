@@ -7,7 +7,20 @@ Quadnet.highscore=Quadnet.highscore||(function(){
     if (highscoreString) {
       highscoreData = JSON.parse(highscoreString);
     } else {
-      highscoreData = [];
+      // default highscore
+      highscoreData = [
+        {name: "----- QUADNET HTML5 REMAKE -----", score: 10000000},
+        {name: "        by Dario Seminara       ", score: 5000000},
+        {name: "     based on 1998's QUADNET    ",score: 1000000},
+        {name: "   created by Martin Magnusson  ",score: 500000},
+        {name: "--------------------------------",score: 100000},
+        {name: "             visit              ",score: 50000},
+        {name: "http://github.com/tario/quadnet ",score: 10000},
+        {name: "          for more info         ",score: 5000},
+        {name: "--------------------------------",score: 1000},
+        {name: "        ENJOY THE GAME!!        ",score: 500}
+        ];
+      save();
     }
   };
   var save = function() {
