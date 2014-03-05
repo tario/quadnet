@@ -281,7 +281,7 @@ table td.right-side img {
 }
 
 .quadnet-screen {
-  transition: all 0.5s ease-in-out;
+  transition: top 1.0s ease-in-out;
 }
 
 .quadnet-screen.toup {
@@ -479,9 +479,9 @@ table td.right-side img {
           document.querySelector("p.highscore-reached").style.display = "inline";
 
           if (Quadnet.highscore.getAllForInput(lastScore)[0].shouldInputName) {
-            Quadnet.music.highscore2({loop: true});
+            setTimeout(function(){Quadnet.music.highscore2({loop: true})},1000);
           } else {
-            Quadnet.music.highscore({loop: true});
+            setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
           }
         } else {
           document.querySelector("p.highscore-reached").style.display = "none";
