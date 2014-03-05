@@ -137,20 +137,44 @@ var quadnet = function(document, canvas_container) {
       this.up = false; this.down = false; this.left = false; this.right = false;
       this.x = 0;
       this.y = 0;
-      this.radius = 6;
+      this.radius = 9;
       this.collision = function(obj) {
-        obj.destroy();
-        this.destroy();
-        if (game_state.lives === 0) {
-          game_state.shouldEndGame = true;
-        } else {
-          game_state.lives--;
-          game_state.shouldInitRound = true;
-        }
+        if (this.collisioned) return;
+        this.collisioned = true;
+
+        var _self = this;
+        this.rotatez = Math.random()*0.04;
+        game_state.driftCamera = true;
+        game_state.driftAngleX = Math.random()*0.01;
+        game_state.driftAngleY = Math.random()*0.01;
+
+        for (var i=0;i<5;i++) {
+          setTimeout(function(){
+            game_state.spawnExplosion(new THREE.Vector3(_self.x+Math.random()*12-6,_self.y+Math.random()*12-6,0));
+          }, Math.random()*1500);
+          setTimeout(function(){
+            game_state.spawnExplosion(new THREE.Vector3(_self.x+Math.random()*12-6,_self.y+Math.random()*12-6,0));
+          }, i*300);
+        };
+
+        setTimeout(function(){
+          _self.destroy();
+          if (game_state.lives === 0) {
+            game_state.shouldEndGame = true;
+          } else {
+            game_state.lives--;
+            game_state.shouldInitRound = true;
+          }
+        }, 1500);
       };
 
       this.think = function(ticks) {
         var velocity = ticks * 0.35;
+        if (this.collisioned) {
+          object3d.rotateZ(this.rotatez);
+          return;
+        }
+
         if (this.up) {
           object3d.rotation.set(0,0,0);
           this.y += velocity;
@@ -370,9 +394,21 @@ var quadnet = function(document, canvas_container) {
         removeObject: function(obj) {
           obj.removed = true;
         },
+
+        updateLives: function() {
+          var html = "";
+          for (var i=0;i<game_state.lives+1;i++) {
+            html = html + "<img class='ship-icon'></img>"
+          }
+          document.querySelector("#quadnet-hud .lives-display").innerHTML = html;
+        },
+
         initRound: function() {
           // remove all objects from scene
           this.objects = [];
+          this.updateLives();
+          this.driftCamera = false;
+          
           scene = (function() { 
               var scene = new THREE.Scene();
 
@@ -450,8 +486,14 @@ var quadnet = function(document, canvas_container) {
                 think: function(ticks) {
                 // camera angle
                 elapsed = elapsed + ticks*0.002;
-                this.anglex = (ship.position.x + Math.cos(elapsed)*10) * Math.PI / 390;
-                this.angley = -(ship.position.y + Math.sin(elapsed)*10) * Math.PI / 390;
+
+                if (game_state.driftCamera) {
+                  this.anglex += game_state.driftAngleX;
+                  this.angley += game_state.driftAngleY;
+                } else {
+                  this.anglex = (ship.position.x + Math.cos(elapsed)*10) * Math.PI / 390;
+                  this.angley = -(ship.position.y + Math.sin(elapsed)*10) * Math.PI / 390;
+                }
                 
                 var updateCameraAngle = function() {
                   var rotationMatrix = new THREE.Matrix4();
@@ -506,6 +548,50 @@ var quadnet = function(document, canvas_container) {
           game_state.objects.push(obj);
         },
 
+        spawnExplosion: function(position) {
+            var projector = new THREE.Projector();
+            var projection = projector.projectVector(position, camera);
+
+            function spawnParticle(type, x, y, dx, dy) {
+              var object3d = type();
+              object3d.position.set(x, y, 1.1);
+              scene.add(object3d);
+              var newobj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
+              newobj.ondestroy(function() {
+                game_state.removeObject(this);
+              });
+              game_state.objects.push(newobj);
+            };
+
+            for (var i=0; i<6; i++)
+              spawnParticle(createWhiteParticle, position.x, position.y, (Math.random()-0.5)*0.4 ,(Math.random()-0.5)*0.4);
+
+            var explosion3DObject = createExplosion();
+            var explosionObject = new Explosion(explosion3DObject, projection.x, projection.y, 400);
+
+            explosionObject.ondestroy(function() {
+              game_state.removeObject(this);
+            });
+            game_state.objects.push(explosionObject);
+            scene.add(explosion3DObject);
+
+
+            Quadnet.sound.explosion(projection);
+
+            var light = explosionLightStock.next();
+            light.position.set(position.x, position.y, 15);
+            light.intensity = 1.0;
+
+            for (var i=50; i<=200; i+=50) {
+              (function() {
+                var intensity = (200-i)/200; 
+                var ttl = i;
+                setTimeout(function(){ light.intensity = intensity;  }, ttl);
+              })();
+            }
+
+            game_state.flashing = true;          
+          },
         spawnAsteroid: function(out_distance) {
 
           out_distance = out_distance || 0;
@@ -544,48 +630,8 @@ var quadnet = function(document, canvas_container) {
           scene.add(object3d);
           var obj = new Asteroid(object3d, x, y, dx, dy);
           obj.ondestroy(function() {
-            var projector = new THREE.Projector();
-            var projection = projector.projectVector(object3d.position, camera);
 
-            function spawnParticle(type, x, y, dx, dy) {
-              var object3d = type();
-              object3d.position.set(x, y, 1.1);
-              scene.add(object3d);
-              var newobj = new Particle(object3d, width + projection.x * width/2 - width/2, height/2 - projection.y * height/2, dx*2.5, dy*2.5, 400);
-              newobj.ondestroy(function() {
-                game_state.removeObject(this);
-              });
-              game_state.objects.push(newobj);
-            };
-
-            for (var i=0; i<6; i++)
-              spawnParticle(createWhiteParticle, obj.x, obj.y, (Math.random()-0.5)*0.4 ,(Math.random()-0.5)*0.4);
-
-            var explosion3DObject = createExplosion();
-            var explosionObject = new Explosion(explosion3DObject, projection.x, projection.y, 400);
-
-            explosionObject.ondestroy(function() {
-              game_state.removeObject(this);
-            });
-            game_state.objects.push(explosionObject);
-            scene.add(explosion3DObject);
-
-
-            Quadnet.sound.explosion(projection);
-
-            var light = explosionLightStock.next();
-            light.position.set(this.x, this.y, 15);
-            light.intensity = 1.0;
-
-            for (var i=50; i<=200; i+=50) {
-              (function() {
-                var intensity = (200-i)/200; 
-                var ttl = i;
-                setTimeout(function(){ light.intensity = intensity;  }, ttl);
-              })();
-            }
-
-            game_state.flashing = true;
+            game_state.spawnExplosion(object3d.position);
             game_state.score += 400;
             game_state.score += game_state.bonus_score;
             game_state.bonus_score += (3000 - game_state.bonus_score) * 0.2;

@@ -28,11 +28,27 @@ body {
 
 #quadnet-hud {color: #0e0; font-size: 100%;}
 #quadnet-hud .display, .label {font-size: 200%}
+#quadnet-hud table {
+  height: 10%;
+  font-family: telegrama;
+}
+
 #quadnet-hud table .label {width: 200px}
 #quadnet-hud table .content.score {width: 150px; text-align: right}
+#quadnet-hud table tr {
+  height: 100%;
+}
 
 #quadnet-hud, #quadnet-welcome-screen, #quadnet-instructions-screen {display: none;}
+#quadnet-hud .lives-display {
+  text-align: right;
+}
 
+#quadnet-hud .lives-display img {
+  content:url("img/live.png");
+  height: 20%;
+  margin-left: 5%;
+}
 
 #quadnet-welcome-screen, #quadnet-instructions-screen  {
   background-color: black;
@@ -294,6 +310,7 @@ table td.right-side img {
     <div id="quadnet-hud" class="quadnet-screen">
       <table>
         <tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td></tr>
+        <tr><td class='label'>LIVES:</td><td><div class="lives-display display"></div></td></tr>
       </table>
     </div>
 
