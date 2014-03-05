@@ -159,7 +159,9 @@
       var activateScreen = function(name) {
         var currentScreen = document.querySelector(".quadnet-screen.active");
         currentScreen.classList.remove("active");
-        setTimeout(function(){currentScreen.style.display = 'none'}, 500);
+        setTimeout(function(){
+          if (!currentScreen.classList.contains("active")) currentScreen.style.display = 'none';
+        }, 1000);
 
         document.querySelector(name).style.display = "inline";
         document.querySelector(name).classList.add("active");
