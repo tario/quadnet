@@ -214,8 +214,17 @@ table td.right-side {
   width: 10%;
 }
 
+table td.right-side iframe {
+  width: 200px;
+}
+
 table td.right-side div {
   margin-bottom: 10%;
+  text-align: left;
+  margin-bottom: 10%;
+  margin-top: 10%;
+  margin-left: 10%;
+  margin-right: 10%;
 }
 
 table td.right-side img {
