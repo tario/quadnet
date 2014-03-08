@@ -169,6 +169,17 @@ a {
   color: #0c0;
 }
 
+#last-score {
+  font-family: telegrama;
+  color: #0f0;
+  font-size:300%;
+  display: none;
+}
+
+#last-score div {
+  display: inline;
+}
+
 #quadnet-welcome-screen .centered-layer {
   position: absolute;
   top: 0;
