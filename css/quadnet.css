@@ -201,21 +201,25 @@ div.credits {
 }
 
 table td.left-side {
-  width: 50%;
+  width: 70%;
 }
 
 table td.middle-side {
   text-align: right;
-  width: 10%;
+  width: 20%;
 }
 
 table td.right-side {
-  text-align: right;
+  text-align: center;
   width: 10%;
 }
 
+table td.right-side div {
+  margin-bottom: 10%;
+}
+
 table td.right-side img {
-  width: 45%;
+  width: 35%;
 }
 
 #quadnet-instructions-screen table.top p {
