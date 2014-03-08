@@ -374,7 +374,7 @@ var quadnet = function(document, canvas_container) {
     var explosionLightStock = LightStock(8, 0xFFFFFF, 250);
     var shootLightStock = LightStock(16, 0xFFFFFF, 100);
 
-    document.querySelector("#quadnet-hud .score-display").innerText = "0";
+    document.querySelector("#quadnet-hud .score-display").textContent = "0";
     var game_state = (function(){
       var createBullet = Quadnet.objects.createBulletFactory();
       var createAsteroid = Quadnet.objects.createAsteroidFactory();
@@ -398,7 +398,7 @@ var quadnet = function(document, canvas_container) {
         updateLives: function() {
           var html = "";
           for (var i=0;i<game_state.lives+1;i++) {
-            html = html + "<img class='ship-icon'></img>"
+            html = html + "<img src='img/live.png' class='ship-icon'></img>"
           }
           document.querySelector("#quadnet-hud .lives-display").innerHTML = html;
         },
@@ -637,7 +637,7 @@ var quadnet = function(document, canvas_container) {
             game_state.bonus_score += (3000 - game_state.bonus_score) * 0.2;
             if (game_state.bonus_score < 0) game_state.bonus_score = 0;
 
-            document.querySelector("#quadnet-hud .score-display").innerText = Math.round(game_state.score);
+            document.querySelector("#quadnet-hud .score-display").textContent = Math.round(game_state.score);
 
             game_state.removeObject(this);
 

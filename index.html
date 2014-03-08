@@ -178,7 +178,7 @@
         }
 
         document.getElementById("last-score").style.display = "inline";
-        document.getElementById("last-score-display").innerText = arguments.score;
+        document.getElementById("last-score-display").textContent = arguments.score;
       });
 
       var activateScreen = function(name) {
@@ -211,7 +211,7 @@
 
         var queryAll = document.querySelectorAll("#quadnet-highscore-screen div table tbody tr td.name"); 
         for (var i=0; i<10; i++) {
-          if (!highscores[i].shouldInputName) queryAll[i].innerText = highscores[i].name;
+          if (!highscores[i].shouldInputName) queryAll[i].textContent = highscores[i].name;
         }
 
         if (lastScoreHighscore) {
