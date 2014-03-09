@@ -113,6 +113,7 @@ table {
   text-align: center;
   width: 100%;
   color: white;
+  margin-top: 1%;
 }
 
 #quadnet-loading-screen {
@@ -156,6 +157,14 @@ h1.quadnet-title {
   color: #080;
   font-size: 1000%;
   margin-bottom: 0;
+  line-height: 100%;
+}
+
+h2.quadnet-title {
+  color: #0f0;
+  font-size: 300%;
+  margin-bottom: 0;
+  line-height: 100%;
 }
 
 h2.press-enter {
