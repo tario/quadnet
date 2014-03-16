@@ -4,13 +4,13 @@ GAME UNDER CONSTRUCTION
 
 This project is a a remake of the classical game named "Quadnet" (http://www.martinmagnusson.com/games/quadnet/) using new technologies of web mainly WebGL, if you want to play the original, use DosBOX, it's still a wonderful and addictive game
 
-Test the game (in development): http://tario.github.io/quadnet/
+Play the game (bata): http://tario.github.io/quadnet/
 
-## Possible Dependencies
-
-These are the possible dependencies, as well as the project grows maybe other dependencies will be added for sound, social networks, etc...
+## Dependencies
 
 * Three.js (http://threejs.org/) 
+* Promise.js
+* Firebase.js
 
 ## Development plan
 
