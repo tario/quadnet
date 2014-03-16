@@ -1,54 +1,62 @@
 var Quadnet = Quadnet||{};
 Quadnet.highscore=Quadnet.highscore||(function(){
-  var highscoreMaxEntries = 10;
-  var highscoreData;;
-  var load = function(){
-    var highscoreString = window.localStorage.getItem("quadnet-highscores");
-    if (highscoreString) {
-      highscoreData = JSON.parse(highscoreString);
-    } else {
-      // default highscore
-      highscoreData = [
-        {name: "----- QUADNET HTML5 REMAKE -----", score: 10000000},
-        {name: "        by Dario Seminara       ", score: 5000000},
-        {name: "     based on 1998's QUADNET    ",score: 1000000},
-        {name: "   created by Martin Magnusson  ",score: 500000},
-        {name: "--------------------------------",score: 100000},
-        {name: "             visit              ",score: 50000},
-        {name: "http://github.com/tario/quadnet ",score: 10000},
-        {name: "          for more info         ",score: 5000},
-        {name: "--------------------------------",score: 1000},
-        {name: "        ENJOY THE GAME!!        ",score: 500}
-        ];
-      save();
+
+  var createChangeCallback = function(cb, newscore) {
+    return function(snapshot) {
+      var array = [];
+      var value = snapshot.val();
+      if (newscore) {
+        array.push({score: newscore, shouldInputName: true});
+      }
+
+      for (key in value) {
+        var obj = value[key];
+        var score = -parseInt(key);
+        for (key2 in obj) {
+          array.push({name: obj[key2], score: score});
+        }
+      } 
+
+      cb(array.sort(function(x,y){ return y.score - x.score; }));
     }
   };
-  var save = function() {
-    window.localStorage.setItem("quadnet-highscores", JSON.stringify(highscoreData));
-  };
 
-  load();
   return {
-    getAllForInput: function(newscore) {
-      var highscoreInputList = highscoreData.slice(0);
-      highscoreInputList.push({score: newscore, shouldInputName: true});
-      highscoreInputList = highscoreInputList.sort(function(a,b){return b.score-a.score;}).slice(0,10)
-      return highscoreInputList;
+    oneChangedAll: function(cb, newscore) {
+      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      firebase.once("value", createChangeCallback(cb, newscore));
     },
 
-    getAll: function() {
-      return highscoreData;
+    onChangedAll: function(cb, newscore) {
+      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      firebase.on("value", createChangeCallback(cb, newscore));
     },
 
-    shouldEnterHighscore: function(score) {
-      if (highscoreData.length < 10) return true;
-      return highscoreData.map(function(x){return score>x.score}).reduce(function(a,b){return a || b});
+    shouldEnterHighscore: function(newscore, yes, no) {
+      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      firebase.once("value", function(snapshot) {
+        var array = [];
+        var entries = 0;
+        var value = snapshot.val();
+        for (key in value) {
+          var obj = value[key];
+          var score = -parseInt(key);
+          for (key2 in obj) {
+            entries++;
+            if (newscore > score) {
+              yes();
+              return;
+            }
+          }
+        }
+
+        (entries < 10 ? yes : no)();
+      });
     },
 
     insert: function(name, score) {
-      highscoreData.push( {name: name, score: score});
-      highscoreData = highscoreData.sort(function(a,b){return b.score-a.score;}).slice(0,10);
-      save();
+      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores/-"+score+"/");
+      firebase.push(name);
     }
   };
 })();

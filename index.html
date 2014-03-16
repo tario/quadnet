@@ -9,6 +9,7 @@
   <script src="js/highscore.js?v=98ad1d" type="text/javascript"></script>
   <script src="js/quadnet-setup.js?v=98ad1d" type="text/javascript"></script>
   <script src="js/3dobjects.js?v=98ad1d" type="text/javascript"></script>
+  <script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.6/firebase.js'></script>
 
   <link href="css/quadnet.css?v=98ad1d" rel="stylesheet" type="text/css">
 
@@ -171,15 +172,22 @@
         Quadnet.onStop(function(arguments) {
           onGame = false;
           lastScore = arguments.score;
-          if (Quadnet.highscore.shouldEnterHighscore(arguments.score)) {
+          var yes = function() {
             lastScoreHighscore = true;
             activateScreen("#quadnet-highscore-screen");
-          } else {
-            activateScreen("#quadnet-welcome-screen");
-          }
+            document.getElementById("last-score").style.display = "inline";
+            document.getElementById("last-score-display").textContent = lastScore;
+          };
 
-          document.getElementById("last-score").style.display = "inline";
-          document.getElementById("last-score-display").textContent = arguments.score;
+          var no = function() {
+            activateScreen("#quadnet-welcome-screen");
+            document.getElementById("last-score").style.display = "inline";
+            document.getElementById("last-score-display").textContent = lastScore;
+
+          }
+          
+          Quadnet.highscore.shouldEnterHighscore(arguments.score, yes, no);
+
         });
 
         var activateScreen = function(name) {
@@ -196,26 +204,40 @@
           (document.querySelector(name).ondisplay || (function(){}) )();
         };
 
+
+        var highscoresChanged = function(scores) {
+          var nameid = 0;
+          var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
+          if (document.querySelector("#quadnet-highscore-screen div table tbody form")) return;
+          // insert highscore on table;
+          tbody.innerHTML = "";
+          for (var i=0; i<scores.length; i++) {
+            nameid = nameid + 1
+            if (scores[i].shouldInputName) {
+              tbody.innerHTML = tbody.innerHTML + "<tr><td class='name'><form><input type='text'></form></input></td><td class='score'>"+scores[i].score+"</td></tr>"
+            } else {
+              tbody.innerHTML = tbody.innerHTML + "<tr><td id='nameid"+nameid+"' class='name'>xxx</td><td class='score'>"+scores[i].score+"</td></tr>"              
+              document.getElementById("nameid"+nameid).textContent = scores[i].name;
+            }
+          };
+        };
+
+        Quadnet.highscore.onChangedAll(highscoresChanged);
+
         document.querySelector("#quadnet-highscore-screen").ondisplay = function() {
           var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
           var html = "";
 
-          var highscores = (lastScoreHighscore ? Quadnet.highscore.getAllForInput(lastScore) : Quadnet.highscore.getAll());
-          tbody.innerHTML = highscores.
-          map(function(obj){
-            if (obj.shouldInputName) {
-              return "<tr><td class='name'><form><input type='text'></form></input></td><td class='score'>"+obj.score+"</td></tr>";
-            } else {
-              return "<tr><td class='name'></td><td class='score'>"+obj.score+"</td></tr>";
-            }
-          }).join("");
-
-          var queryAll = document.querySelectorAll("#quadnet-highscore-screen div table tbody tr td.name"); 
-          for (var i=0; i<10; i++) {
-            if (!highscores[i].shouldInputName) queryAll[i].textContent = highscores[i].name;
-          }
-
           if (lastScoreHighscore) {
+            Quadnet.highscore.oneChangedAll(function(scores) {
+              if (scores[0].shouldInputName) {
+                setTimeout(function(){Quadnet.music.highscore2({loop: true})},1000);
+              } else {
+                setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
+              }
+              highscoresChanged(scores);
+            }, lastScore);
+
             document.querySelector("table.highscores input").focus();
             document.querySelector("table.highscores form").onsubmit = function() {
               Quadnet.highscore.insert(document.querySelector("table.highscores form input").value, lastScore);
@@ -225,12 +247,6 @@
             };
 
             document.querySelector("p.highscore-reached").style.display = "inline";
-
-            if (Quadnet.highscore.getAllForInput(lastScore)[0].shouldInputName) {
-              setTimeout(function(){Quadnet.music.highscore2({loop: true})},1000);
-            } else {
-              setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
-            }
           } else {
             document.querySelector("p.highscore-reached").style.display = "none";
           }
