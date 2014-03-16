@@ -149,6 +149,11 @@ table {
     padding: 0 20px;
     }
 
+#quadnet-highscore-screen #inner {
+    height: 65%;
+    overflow: auto;
+}
+
 .centered-layer {
   text-align: center;
 }

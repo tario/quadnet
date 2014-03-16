@@ -243,6 +243,13 @@
               Quadnet.highscore.insert(document.querySelector("table.highscores form input").value, lastScore);
               document.querySelector("#quadnet-highscore-screen").classList.add("toup");
               activateScreen("#quadnet-welcome-screen");
+              
+              setTimeout(function() {
+                var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
+                tbody.innerHTML = "";
+                Quadnet.highscore.oneChangedAll(highscoresChanged);
+              }, 1000);
+
               return false;
             };
 
@@ -255,13 +262,16 @@
             document.querySelector("#quadnet-highscore-screen").classList.remove("toup");
           
           if (!lastScoreHighscore) {
-            window.onkeydown = function(e){
+            var dismiss = function() {
               document.querySelector("#quadnet-highscore-screen").classList.add("toup");
               activateScreen("#quadnet-welcome-screen");
             };
+            window.onkeydown = function(e){
+              if (e.keyCode === 27) dismiss();
+            };
 
             var fcn = function() {
-              window.onkeydown();
+              dismiss();
               document.body.removeEventListener('click', fcn, false);
             };
             document.body.addEventListener('click', fcn, false);
