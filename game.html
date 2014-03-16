@@ -1,0 +1,334 @@
+<html>
+<head>
+  <meta http-equiv="pragma" content="no-cache" />
+  <meta http-equiv="expires" content="-1">
+
+  <script src="js/promise-3.2.0.js"></script>
+  <script src="js/three.min.js" type="text/javascript"></script>
+  <script src="js/quadnet.js?v=a90c805" type="text/javascript"></script>
+  <script src="js/highscore.js?v=a90c805" type="text/javascript"></script>
+  <script src="js/quadnet-setup.js?v=a90c805" type="text/javascript"></script>
+  <script src="js/3dobjects.js?v=a90c805" type="text/javascript"></script>
+  <script type='text/javascript' src='https://cdn.firebase.com/js/client/1.0.6/firebase.js'></script>
+
+  <link href="css/quadnet.css?v=a90c805" rel="stylesheet" type="text/css">
+
+  <title>Tario's Quadnet</title>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-6576341-2']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</head>
+
+<body>
+  <div id="quadnet">
+    <div id="canvas-container">
+    </div>
+    <div id="quadnet-loading-screen" class="quadnet-screen active">
+      <div id="container">
+        <div id="content">
+          <div id="inner">        
+            <h1>LOADING...</h1>
+          </div><!-- fin inner -->
+        </div><!-- fin content" -->
+      </div>
+    </div>
+
+    <div id="quadnet-hud" class="quadnet-screen">
+      <table>
+        <tr><td class='label'>SCORE:</td><td class='content score'><div class='score-display display'>0</div></td></tr>
+        <tr><td class='label'>LIVES:</td><td><div class="lives-display display"></div></td></tr>
+      </table>
+    </div>
+
+    <div id="quadnet-welcome-screen" class="quadnet-screen toup">
+      <div class="centered-layer">
+        <img class="netimage" src="img/welcomenet.jpg"> </img>
+      </div>
+      <div class="centered-layer">
+        <h1 class="quadnet-title">QUADNET</h1>
+        <h2 class="press-enter"><a href="#">Press Enter to Play</a></h2>
+        <h2 class="see-highscores"><a href="#">See Highscores</a></h2>
+        <h2 id="last-score">LAST SCORE: <div id="last-score-display"></div></h2>
+
+        <div class="footer">
+          <table>
+            <thead>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="left-side">
+                  <div class="credits">Dario Seminara <br/>
+                    <a href="http://github.com/tario/quadnet">http://github.com/tario/quadnet</a><br/>
+                    Tribute to 1998's QUADNET <br/>
+                    <a href="http://www.martinmagnusson.com/games/quadnet">http://www.martinmagnusson.com/games/quadnet</a>
+                  </div>
+                </td>
+                <td class="middle-side">
+                  Share this game with your friends!
+                </td>
+                <td class="right-side">
+                  <div>
+                    <a href="//twitter.com/share" class="twitter-share-button" data-text="Check this new game!" data-size="large" data-hashtags="quadnet">Tweet</a>
+  <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+                  </div>
+                  <div>
+<iframe src="//www.facebook.com/plugins/like.php?href=https%3A%2F%2Ftario.github.io%2Fquadnet%2F&amp;width&amp;layout=button_count&amp;action=like&amp;show_faces=true&amp;share=true&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; height:21px;" allowTransparency="true"></iframe>
+                  </div>
+                </td>
+
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    
+    </div>
+
+
+    <div id="quadnet-instructions-screen" class="quadnet-screen toup">
+      <table class="top">
+        <tr>
+          <td><p>INSTRUCTIONS</p></td>
+        </tr>
+      </table>
+      <table class="middle">
+        <tr>
+          <td class="img-td">
+            <div><img src="img/instr1.jpg"></img></div>
+          </td>
+          <td class="text-td">
+            <p>Use arrow keys to move the ship in all four directions</p>
+          </td>
+          <td class="img-td">
+            <div><img src="img/instr2.gif"></img></div>
+          </td>
+          <td class="text-td">
+            <p>Use WASD to shoot in all four directions</p>
+          </td>
+        </tr>
+      </table>
+      <table class="bottom">
+        <tr>
+          <td class="text-td">
+            <p>Evade asteroids to avoid colliding with them</p>
+          </td>
+          <td class="img-td">
+            <div><img src="img/instr3.jpg"></img></div>
+          </td>
+          <td class="text-td">
+            <p>Shoot to destroy asteroids and earn points</p>
+          </td>
+          <td class="img-td">
+            <div><img src="img/instr4.jpg"></img></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="quadnet-highscore-screen" class="quadnet-screen toup">
+      <h2 class="quadnet-title">HIGHSCORES</h2>
+      <p class="highscore-reached">Congratulations! your score reach highscore table!</p>
+
+      <div id="container" class="overlay">
+        <div id="content">
+          <div id="inner">  
+            <table class="highscores">
+              <thead>
+                <th class="name-column">Name</th>
+                <th class="score-column">Score</th>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <script type="text/javascript">
+    (function(){
+      var initialize = function(){
+        var onGame = false;
+        var lastScore;
+        var lastScoreHighscore;
+
+        var launch = function() {
+          activateScreen("#quadnet-hud");
+          quadnet(document, document.getElementById("canvas-container"));
+          onGame = true;
+        };
+
+        Quadnet.onStop(function(arguments) {
+          onGame = false;
+          lastScore = arguments.score;
+          var yes = function() {
+            lastScoreHighscore = true;
+            activateScreen("#quadnet-highscore-screen");
+            document.getElementById("last-score").style.display = "inline";
+            document.getElementById("last-score-display").textContent = lastScore;
+          };
+
+          var no = function() {
+            activateScreen("#quadnet-welcome-screen");
+            document.getElementById("last-score").style.display = "inline";
+            document.getElementById("last-score-display").textContent = lastScore;
+
+          }
+          
+          Quadnet.highscore.shouldEnterHighscore(arguments.score, yes, no);
+
+        });
+
+        var activateScreen = function(name) {
+          var currentScreen = document.querySelector(".quadnet-screen.active");
+          currentScreen.classList.remove("active");
+          setTimeout(function(){
+            if (!currentScreen.classList.contains("active")) currentScreen.style.display = 'none';
+          }, 1000);
+
+          document.querySelector(name).style.display = "inline";
+          document.querySelector(name).classList.add("active");
+
+          window.onkeydown = function(){};
+          (document.querySelector(name).ondisplay || (function(){}) )();
+        };
+
+
+        var highscoresChanged = function(scores) {
+          var nameid = 0;
+          var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
+          if (document.querySelector("#quadnet-highscore-screen div table tbody form")) return;
+          // insert highscore on table;
+          tbody.innerHTML = "";
+          for (var i=0; i<scores.length; i++) {
+            nameid = nameid + 1
+            if (scores[i].shouldInputName) {
+              tbody.innerHTML = tbody.innerHTML + "<tr><td class='name'><form><input type='text'></form></input></td><td class='score'>"+scores[i].score+"</td></tr>"
+            } else {
+              tbody.innerHTML = tbody.innerHTML + "<tr><td id='nameid"+nameid+"' class='name'>xxx</td><td class='score'>"+scores[i].score+"</td></tr>"              
+              document.getElementById("nameid"+nameid).textContent = scores[i].name;
+            }
+          };
+        };
+
+        Quadnet.highscore.onChangedAll(highscoresChanged);
+
+        document.querySelector("#quadnet-highscore-screen").ondisplay = function() {
+          var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
+          var html = "";
+
+          if (lastScoreHighscore) {
+            Quadnet.highscore.oneChangedAll(function(scores) {
+              if (scores[0].shouldInputName) {
+                setTimeout(function(){Quadnet.music.highscore2({loop: true})},1000);
+              } else {
+                setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
+              }
+              highscoresChanged(scores);
+            }, lastScore);
+
+            document.querySelector("table.highscores input").focus();
+            document.querySelector("table.highscores form").onsubmit = function() {
+              Quadnet.highscore.insert(document.querySelector("table.highscores form input").value, lastScore);
+              document.querySelector("#quadnet-highscore-screen").classList.add("toup");
+              activateScreen("#quadnet-welcome-screen");
+              
+              setTimeout(function() {
+                var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
+                tbody.innerHTML = "";
+                Quadnet.highscore.oneChangedAll(highscoresChanged);
+              }, 1000);
+
+              return false;
+            };
+
+            document.querySelector("p.highscore-reached").style.display = "inline";
+          } else {
+            document.querySelector("p.highscore-reached").style.display = "none";
+          }
+
+          setTimeout(function() {
+            document.querySelector("#quadnet-highscore-screen").classList.remove("toup");
+          
+          if (!lastScoreHighscore) {
+            var dismiss = function() {
+              document.querySelector("#quadnet-highscore-screen").classList.add("toup");
+              activateScreen("#quadnet-welcome-screen");
+            };
+            window.onkeydown = function(e){
+              if (e.keyCode === 27) dismiss();
+            };
+
+            var fcn = function() {
+              dismiss();
+              document.body.removeEventListener('click', fcn, false);
+            };
+            document.body.addEventListener('click', fcn, false);
+
+          }
+
+          }, 0);
+
+        };
+
+        document.querySelector("#quadnet-welcome-screen").ondisplay = function() {
+          setTimeout(function() {
+            document.querySelector("#quadnet-welcome-screen").classList.remove("toup");
+          }, 0);
+          window.onkeydown = function(e){
+            if (e.keyCode === 13) {
+              document.querySelector("#quadnet-welcome-screen").classList.add("toup");
+              activateScreen("#quadnet-instructions-screen");
+            };
+          };
+        };
+
+        document.querySelector("#quadnet-instructions-screen").ondisplay = function() {
+          setTimeout(function() {
+            document.querySelector("#quadnet-instructions-screen").classList.remove("toup");
+            window.onkeydown = function(e){
+              onGame = true;
+              document.querySelector("#quadnet-instructions-screen").classList.add("toup");
+              launch();
+            };
+
+            var fcn = function() {
+              window.onkeydown();
+              document.body.removeEventListener('click', fcn, false);
+            };
+            document.body.addEventListener('click', fcn, false);
+
+          }, 0);
+
+        };
+
+        document.querySelector(".press-enter a").onclick = function() {
+          activateScreen("#quadnet-instructions-screen");
+        };
+        document.querySelector(".see-highscores a").onclick = function() {
+          lastScoreHighscore = false;
+          activateScreen("#quadnet-highscore-screen");
+        };
+        activateScreen("#quadnet-welcome-screen");
+      };
+ 
+      Promise.all(
+        new Promise(function(resolve,reject){ window.onload = resolve}),
+        Quadnet.prepareResources()
+        ).then(initialize);
+
+    })();
+  </script>
+</body>
+</html>
