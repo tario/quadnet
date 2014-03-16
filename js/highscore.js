@@ -11,42 +11,41 @@ Quadnet.highscore=Quadnet.highscore||(function(){
 
       for (key in value) {
         var obj = value[key];
-        var score = -parseInt(key);
-        for (key2 in obj) {
-          array.push({name: obj[key2], score: score});
-        }
+        array.push({name: obj.name, score: obj.score});
       } 
 
       cb(array.sort(function(x,y){ return y.score - x.score; }));
     }
   };
 
+  var highscoreFirebase = function() {
+    return new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+  };
+
   return {
     oneChangedAll: function(cb, newscore) {
-      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      var firebase = highscoreFirebase();
       firebase.once("value", createChangeCallback(cb, newscore));
     },
 
     onChangedAll: function(cb, newscore) {
-      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      var firebase = highscoreFirebase();
       firebase.on("value", createChangeCallback(cb, newscore));
     },
 
     shouldEnterHighscore: function(newscore, yes, no) {
-      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      var firebase = highscoreFirebase();
       firebase.once("value", function(snapshot) {
         var array = [];
         var entries = 0;
         var value = snapshot.val();
         for (key in value) {
+          entries++;
           var obj = value[key];
-          var score = -parseInt(key);
-          for (key2 in obj) {
-            entries++;
-            if (newscore > score) {
-              yes();
-              return;
-            }
+          var score = obj.score;
+          if (newscore > score) {
+            yes();
+            return;
           }
         }
 
@@ -55,8 +54,8 @@ Quadnet.highscore=Quadnet.highscore||(function(){
     },
 
     insert: function(name, score) {
-      var firebase = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores/-"+score+"/");
-      firebase.push(name);
+      var firebase = highscoreFirebase();
+      firebase.push({name: name, score: score});
     }
   };
 })();
