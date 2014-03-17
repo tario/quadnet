@@ -46,6 +46,7 @@ Quadnet.highscore=Quadnet.highscore||(function(){
     },
 
     insert: function(name, score) {
+      if (name == "") return;
       var firebase = highscoreFirebase();
       firebase.push({name: name, score: score});
     }
