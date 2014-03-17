@@ -28,6 +28,10 @@ Quadnet.highscore=Quadnet.highscore||(function(){
     },
 
     shouldEnterHighscore: function(newscore, yes, no) {
+      if (newscore == 0) {
+        no(); return;
+      }
+      
       if (scoresArray.length < 10) {
         yes(); return;
       }
