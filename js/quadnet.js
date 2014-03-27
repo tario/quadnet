@@ -1,5 +1,32 @@
 var quadnet = function(document, canvas_container) {
   var main = function() {
+    var peer = new Peer({key: 'wg2tv1rydvv1v2t9'});
+    var firebaseEntry;
+    peer.on('connection', function(conn) {
+      conn.send("hi!");
+    });
+
+    var initializePeer = function() {
+
+      var gameFirebase = function() {
+        return new Firebase("https://scorching-fire-8890.firebaseio.com/game");
+      };
+
+      // generate a peer receiver
+      // TODO: fix race condition on peer.id
+      setTimeout(function() {
+        var firebase = gameFirebase();
+        firebaseEntry = firebase.push({peer_id: peer.id});
+      }, 5000);
+
+    };
+
+    var destroyPeer = function() {
+      peer.destroy();
+      firebaseEntry.remove();
+    };
+
+    initializePeer();
 
     Quadnet.music.game({loop: true});
 
@@ -684,6 +711,7 @@ var quadnet = function(document, canvas_container) {
       game_state.initRound();
 
       var removeQuadnet = function() {
+        destroyPeer();
         Quadnet.music.stop();
         while (canvas_container.firstChild) {
           canvas_container.removeChild(canvas_container.firstChild);
