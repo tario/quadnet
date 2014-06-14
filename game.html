@@ -10,6 +10,8 @@
   <script src="js/quadnet-setup.js?v=2ded6e8" type="text/javascript"></script>
   <script src="js/3dobjects.js?v=2ded6e8" type="text/javascript"></script>
   <script src='js/firebase.js' type='text/javascript'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
+  <script src="https://cdn.firebase.com/libs/angularfire/0.7.1/angularfire.min.js"></script>
 
   <link href="css/quadnet.css?v=2ded6e8" rel="stylesheet" type="text/css">
 
@@ -142,12 +144,16 @@
       <div id="container" class="overlay">
         <div id="content">
           <div id="inner">  
-            <table class="highscores">
+            <table class="highscores" ng-app="QuadnetApp">
               <thead>
                 <th class="name-column">Name</th>
                 <th class="score-column">Score</th>
               </thead>
-              <tbody>
+              <tbody ng-controller="LeaderboardController">
+                <tr ng-repeat="entry in scores | orderByPriority | orderBy:'-score'">
+                  <td class='name'>{{entry.name}}</td>
+                  <td class='score'>{{entry.score}}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -156,6 +162,15 @@
     </div>
 
   </div>
+
+  <script type="text/javascript">
+    var quadnetApp = angular.module("QuadnetApp", ["firebase"]);
+    quadnetApp.controller("LeaderboardController", function($scope, $firebase) {
+      var leaderboardRef = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
+      $scope.scores = $firebase(leaderboardRef);
+    });
+  </script>
+
   <script type="text/javascript">
     (function(){
       var initialize = function(){
@@ -204,27 +219,6 @@
           (document.querySelector(name).ondisplay || (function(){}) )();
         };
 
-
-        var highscoresChanged = function(scores) {
-          var nameid = 0;
-          var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
-          if (document.querySelector("#quadnet-highscore-screen div table tbody form")) return;
-          // insert highscore on table;
-          tbody.innerHTML = "";
-          for (var i=0; i<scores.length; i++) {
-            nameid = nameid + 1
-            if (scores[i].shouldInputName) {
-              tbody.innerHTML = tbody.innerHTML + "<tr><td class='name'><form><input type='text'></form></input></td><td class='score'>"+scores[i].score+"</td></tr>"
-            } else {
-              tbody.innerHTML = tbody.innerHTML + "<tr><td id='nameid"+nameid+"' class='name'>xxx</td><td class='score'>"+scores[i].score+"</td></tr>"              
-              document.getElementById("nameid"+nameid).textContent = scores[i].name;
-            }
-          };
-        };
-
-        if (Firebase)
-          Quadnet.highscore.onChangedAll(highscoresChanged);
-
         document.querySelector("#quadnet-highscore-screen").ondisplay = function() {
           var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
           var html = "";
@@ -236,23 +230,7 @@
               } else {
                 setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
               }
-              highscoresChanged(scores);
             }, lastScore);
-
-            document.querySelector("table.highscores input").focus();
-            document.querySelector("table.highscores form").onsubmit = function() {
-              Quadnet.highscore.insert(document.querySelector("table.highscores form input").value, lastScore);
-              document.querySelector("#quadnet-highscore-screen").classList.add("toup");
-              activateScreen("#quadnet-welcome-screen");
-              
-              setTimeout(function() {
-                var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
-                tbody.innerHTML = "";
-                Quadnet.highscore.oneChangedAll(highscoresChanged);
-              }, 1000);
-
-              return false;
-            };
 
             document.querySelector("p.highscore-reached").style.display = "inline";
           } else {
