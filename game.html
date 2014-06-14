@@ -10,8 +10,8 @@
   <script src="js/quadnet-setup.js?v=2ded6e8" type="text/javascript"></script>
   <script src="js/3dobjects.js?v=2ded6e8" type="text/javascript"></script>
   <script src='js/firebase.js' type='text/javascript'></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.6/angular.min.js"></script>
-  <script src="https://cdn.firebase.com/libs/angularfire/0.7.1/angularfire.min.js"></script>
+  <script src="js/angular.js"></script>
+  <script src="js/angularfire.js"></script>
 
   <link href="css/quadnet.css?v=2ded6e8" rel="stylesheet" type="text/css">
 
@@ -150,8 +150,9 @@
                 <th class="score-column">Score</th>
               </thead>
               <tbody ng-controller="LeaderboardController">
-                <tr ng-repeat="entry in scores | orderByPriority | orderBy:'-score'">
-                  <td class='name'>{{entry.name}}</td>
+                <tr ng-repeat="entry in combined = (scores | orderByPriority).concat(newscores) | orderBy:'-score'">
+                  <td ng-if="entry.input" class='name'><input type='text' /></td>
+                  <td ng-if="!entry.input" class='name'>{{entry.name}}</td>
                   <td class='score'>{{entry.score}}</td>
                 </tr>
               </tbody>
@@ -167,7 +168,9 @@
     var quadnetApp = angular.module("QuadnetApp", ["firebase"]);
     quadnetApp.controller("LeaderboardController", function($scope, $firebase) {
       var leaderboardRef = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
-      $scope.scores = $firebase(leaderboardRef);
+      var obj = $firebase(leaderboardRef);
+      $scope.newscores = [];
+      $firebase(leaderboardRef).$bind($scope, 'scores');
     });
   </script>
 
