@@ -203,21 +203,12 @@
         Quadnet.onStop(function(arguments) {
           onGame = false;
           lastScore = arguments.score;
-          var yes = function() {
+          if (lastScore > 0) {          
             lastScoreHighscore = true;
             activateScreen("#quadnet-highscore-screen");
             document.getElementById("last-score").style.display = "inline";
             document.getElementById("last-score-display").textContent = lastScore;
-          };
-
-          var no = function() {
-            activateScreen("#quadnet-welcome-screen");
-            document.getElementById("last-score").style.display = "inline";
-            document.getElementById("last-score-display").textContent = lastScore;
-
           }
-          
-          Quadnet.highscore.shouldEnterHighscore(arguments.score, yes, no);
 
         });
 
