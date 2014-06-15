@@ -143,7 +143,7 @@
 
       <div id="container" class="overlay">
         <div id="content">
-          <div id="inner">  
+          <div id="inner">
             <table class="highscores" ng-app="QuadnetApp">
               <thead>
                 <th class="name-column">Name</th>
@@ -151,7 +151,7 @@
               </thead>
               <tbody ng-controller="LeaderboardController">
                 <tr ng-repeat="entry in combined = (scores | orderByPriority).concat(newscores) | orderBy:'-score'">
-                  <td ng-if="entry.input" class='name'><input type='text' /></td>
+                  <td ng-if="entry.input" class='name'><form class="newname-form" ng-submit="sendScore()"><input ng-model="name" /></form></td>
                   <td ng-if="!entry.input" class='name'>{{entry.name}}</td>
                   <td class='score'>{{entry.score}}</td>
                 </tr>
@@ -170,6 +170,19 @@
       var leaderboardRef = new Firebase("https://scorching-fire-8890.firebaseio.com/highscores");
       var obj = $firebase(leaderboardRef);
       $scope.newscores = [];
+        
+      $scope.sendScore = function() {
+        leaderboardRef.push({name: this.name, score: $scope.newscores[0].score});
+        $scope.newscores = [];
+        if (Quadnet.onScoreInput) Quadnet.onScoreInput();
+      };
+
+      Quadnet.activateHighscoreInput = function(score) {
+        $scope.$apply(function() {
+          $scope.newscores = [{name: '', input: true, score: score}];
+        });
+      };
+
       $firebase(leaderboardRef).$bind($scope, 'scores');
     });
   </script>
@@ -225,16 +238,17 @@
         document.querySelector("#quadnet-highscore-screen").ondisplay = function() {
           var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
           var html = "";
+          var dismiss = function() {
+            document.querySelector("#quadnet-highscore-screen").classList.add("toup");
+            activateScreen("#quadnet-welcome-screen");
+          };
 
           if (lastScoreHighscore) {
-            Quadnet.highscore.oneChangedAll(function(scores) {
-              if (scores[0].shouldInputName) {
-                setTimeout(function(){Quadnet.music.highscore2({loop: true})},1000);
-              } else {
-                setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
-              }
-            }, lastScore);
-
+            Quadnet.activateHighscoreInput(lastScore);
+            setTimeout(function() {
+              document.querySelectorAll(".newname-form input")[0].focus();
+              Quadnet.onScoreInput = dismiss;
+            },500);
             document.querySelector("p.highscore-reached").style.display = "inline";
           } else {
             document.querySelector("p.highscore-reached").style.display = "none";
@@ -244,10 +258,6 @@
             document.querySelector("#quadnet-highscore-screen").classList.remove("toup");
           
           if (!lastScoreHighscore) {
-            var dismiss = function() {
-              document.querySelector("#quadnet-highscore-screen").classList.add("toup");
-              activateScreen("#quadnet-welcome-screen");
-            };
             window.onkeydown = function(e){
               if (e.keyCode === 27) dismiss();
             };
