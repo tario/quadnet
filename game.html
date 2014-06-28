@@ -235,6 +235,8 @@
 
           if (lastScoreHighscore) {
             Quadnet.activateHighscoreInput(lastScore);
+
+            setTimeout(function(){Quadnet.music.highscore({loop: true})},1000);
             setTimeout(function() {
               document.querySelectorAll(".newname-form input")[0].focus();
               Quadnet.onScoreInput = dismiss;
