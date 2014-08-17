@@ -58,7 +58,8 @@ table {
   text-align: center;
   color: white;
   background: url('../img/background.jpg');
-  background-size:100% 100%;  
+  background-size:100% 100%;
+  display: none;  
 }
 
 #quadnet-highscore-screen table.highscores {
@@ -83,6 +84,9 @@ table {
 
 #quadnet-highscore-screen table.highscores td.name {
   text-align: left;
+  max-width: 0;
+  width: 100%;
+  overflow: hidden;
 }
 
 #quadnet-highscore-screen form {
@@ -141,6 +145,7 @@ table {
     display: table-cell;
     vertical-align: middle;
     position: relative;
+    height: 750px;
     }
 
 #inner {
