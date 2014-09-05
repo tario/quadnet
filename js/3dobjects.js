@@ -58,6 +58,10 @@ Quadnet.prepareResources = function() {
 
             var sound_x = Math.sin(sourcePosition.x * 45 * (Math.PI / 180));
             var sound_z = Math.sin(zDeg * (Math.PI / 180));
+
+            if (!isFinite(sound_x)) sound_x = 0;
+            if (!isFinite(sound_z)) sound_z = 0;
+
             panner.setPosition(sound_x, 0, sound_z);
 
             bufferSource.connect(panner);
