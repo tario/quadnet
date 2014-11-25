@@ -229,6 +229,7 @@
           var tbody = document.querySelector("#quadnet-highscore-screen div table tbody");
           var html = "";
           var dismiss = function() {
+            document.body.removeEventListener('click', dismiss, false);
             document.querySelector("#quadnet-highscore-screen").classList.add("toup");
             activateScreen("#quadnet-welcome-screen");
           };
@@ -254,11 +255,7 @@
               if (e.keyCode === 27) dismiss();
             };
 
-            var fcn = function() {
-              dismiss();
-              document.body.removeEventListener('click', fcn, false);
-            };
-            document.body.addEventListener('click', fcn, false);
+            document.body.addEventListener('click', dismiss, false);
 
           }
 
