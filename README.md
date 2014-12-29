@@ -4,7 +4,7 @@ GAME UNDER CONSTRUCTION
 
 This project is a a remake of the classical game named "Quadnet" (http://www.martinmagnusson.com/games/quadnet/) using new technologies of web mainly WebGL, if you want to play the original, use DosBOX, it's still a wonderful and addictive game
 
-Play the game (bata): http://tario.github.io/quadnet/
+Play the game (beta): http://tario.github.io/quadnet/
 
 ## Dependencies
 
