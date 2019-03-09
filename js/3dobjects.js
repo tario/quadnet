@@ -18,6 +18,7 @@ Quadnet.music = Quadnet.music || (function() {
       music.forEach(function(entry) {
         var audioElement = new Audio("music/" + entry + ".ogg");
         audioElement.loop = true;
+        audioElement.volume = 0.6;
         ret[entry] = function() {
           Quadnet.music.stop();
           setCurrent(audioElement);
@@ -29,6 +30,18 @@ Quadnet.music = Quadnet.music || (function() {
 
 (function() {
   var context = new (window.AudioContext || window.webkitAudioContext)();
+  var merger = context.createChannelMerger(2);
+  merger.connect(context.destination);
+
+  var soundWindowLeft = -0.5;
+  var soundWindowRight = -soundWindowLeft;
+  var soundWindowWidth = soundWindowRight - soundWindowLeft;
+
+  function trimPosition(x) {
+    if (x < soundWindowLeft) return soundWindowLeft;
+    if (x > soundWindowRight) return soundWindowRight;
+    return x;
+  };
 
 Quadnet.prepareResources = function() { 
   var textures = {};
@@ -50,25 +63,31 @@ Quadnet.prepareResources = function() {
       request.onload = function(e) {
         context.decodeAudioData(request.response, function (buffer) {
           Quadnet.sound[name] = function(sourcePosition) {
-            var panner = context.createPanner();
+            var lGain = Math.pow(1 - (trimPosition(sourcePosition.x) - soundWindowLeft) / soundWindowWidth, 0.7);
+            var rGain = Math.pow((trimPosition(sourcePosition.x) - soundWindowLeft) / soundWindowWidth, 0.7);
+
+            var gainL = context.createGain();
+            var gainR = context.createGain();
+            gainL.gain.setValueAtTime(lGain, context.currentTime);
+            gainR.gain.setValueAtTime(rGain, context.currentTime);
+
             var bufferSource = context.createBufferSource();
 
-            var zDeg = sourcePosition.x * 45 + 90;
-            if (zDeg > 90) zDeg = 180 - zDeg;
-
-            var sound_x = Math.sin(sourcePosition.x * 45 * (Math.PI / 180));
-            var sound_z = Math.sin(zDeg * (Math.PI / 180));
-
-            if (!isFinite(sound_x)) sound_x = 0;
-            if (!isFinite(sound_z)) sound_z = 0;
-
-            panner.setPosition(sound_x, 0, sound_z);
-
-            bufferSource.connect(panner);
-            panner.connect(context.destination);
+            bufferSource.connect(gainL);
+            bufferSource.connect(gainR);
+            gainL.connect(merger, 0, 0);
+            gainR.connect(merger, 0, 1);
 
             bufferSource.buffer = buffer;
             bufferSource.start(context.currentTime);
+            bufferSource.onended = function() {
+              gainL.disconnect(merger);
+              gainR.disconnect(merger);
+              bufferSource.disconnect(gainL);
+              bufferSource.disconnect(gainR);
+
+              delete bufferSource.onended;
+            };
           };
 
           resolve();
