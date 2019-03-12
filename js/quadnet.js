@@ -1,8 +1,7 @@
 var quadnet = function(document, canvas_container) {
+  Quadnet.music.game({loop: true});
+
   var main = function() {
-
-    Quadnet.music.game({loop: true});
-
     var origin = new THREE.Vector3(0,0,0);
     var camera;
     
@@ -711,5 +710,7 @@ var quadnet = function(document, canvas_container) {
     })();
   };
 
-  Quadnet.prepareResources().then(main);
+  Quadnet.prepareResources().then(main).catch(function(err) {
+    Quadnet.music.stop();
+  });
 };
