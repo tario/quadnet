@@ -309,11 +309,9 @@
         };
         activateScreen("#quadnet-welcome-screen");
       };
- 
-      Promise.all(
-        new Promise(function(resolve,reject){ window.onload = resolve}),
-        Quadnet.prepareResources()
-        ).then(
+
+      var delay = new Promise(function(resolve,reject){ setTimeout(resolve,5)});
+      delay.then(
           function() {
           try {
             initialize() 
