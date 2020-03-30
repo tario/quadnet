@@ -710,7 +710,15 @@ var quadnet = function(document, canvas_container) {
     })();
   };
 
-  Quadnet.prepareResources().then(main).catch(function(err) {
-    Quadnet.music.stop();
-  });
+  Quadnet
+    .prepareResources()
+    .then(main)
+    .then(function() {
+
+    }, function() {
+      // avoid the use of Promise#catch.
+      // under certain conditions, browsers are not able to use "advanced" promises
+      // and they fallback to the basic implementation (without .catch)
+      Quadnet.music.stop();
+    });
 };
